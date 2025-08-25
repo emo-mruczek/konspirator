@@ -4,5 +4,10 @@ version = "0.1.0"
 edition = "2024"
 authors = ["emo-mruczek"]
 
-[dependencies]
+# https://lalrpop.github.io/lalrpop/tutorial/001_adding_lalrpop.html
+
+[build-dependencies] 
 lalrpop = "0.22.2"
+
+[dependencies]
+lalrpop-util = { version = "0.21.0", features = ["lexer", "unicode"] }
