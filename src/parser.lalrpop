@@ -1,0 +1,17 @@
+// https://lalrpop.github.io/lalrpop/tutorial/002_paren_numbers.html
+
+use std::str::FromStr;
+use ast::*;
+
+grammar;
+
+pub TERM: i64 = {
+  <n:NUM> => n,
+  "(" <t:TERM> ")" => t,
+};
+
+
+
+VALUE: VALUE
+
+NUM: i64 = <s:r"[0-9]+" => i64::from_str(s).unwrap();
