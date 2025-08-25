@@ -1,0 +1,8 @@
+[package]
+name = "konspirator"
+version = "0.1.0"
+edition = "2024"
+authors = ["emo-mruczek"]
+
+[dependencies]
+lalrpop = "0.22.2"
