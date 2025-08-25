@@ -5,13 +5,63 @@ use ast::*;
 
 grammar;
 
-pub TERM: i64 = {
-  <n:NUM> => n,
-  "(" <t:TERM> ")" => t,
+NUM: Num = {
+  <s: r"[0-9]+" => Num(i64::from_str(s).unwrap());
+}
+
+// TODO: 
+PID: PID = {
+  <s: r"[_a-z]+"> => PID(s.to_string().unwrap()),
+};
+
+IDENTIFIER: Identifier = {
+  <p: PID> => Identifier::Base(p),
+  <p: PID> "[" <n: NUM> "]" => Identifier::Array(p, n),
+  <pl: PID> "[" <pr: PID> "]" => Identifier::VLA(pl, pr),
+};
+
+VALUE: Value = {
+  <n: NUM> => Value::Num(n),
+  <i: IDENTIFIER> => Value::Var(i),
+};
+
+CONDITION: Condition = {
+  <lv: VALUE> "=" <rv: VALUE> => Condition::Equal(lv, rv),
+  <lv: VALUE> "!=" <rv: VALUE> => Condition::NotEqual(lv, rv),
+  <lv: VALUE> ">" <rv: VALUE> => Condition::Greater(lv, rv),
+  <lv: VALUE> "<" <rv: VALUE> => Condition::Less(lv, rv),
+  <lv: VALUE> ">=" <rv: VALUE> => Condition::GreaterEqual(lv, rv),
+  <lv: VALUE> "<=" <rv: VALUE> => Condition::LessEqual(lv, rv),
+};
+
+EXPRESSION: Expression = {
+  <lv: VALUE> => Expression::Val(lv), 
+  <lv: VALUE> "+" <rv: VALUE> => Expression::Add(lv, rv), 
+  <lv: VALUE> "-" <rv: VALUE> => Expression::Sub(lv, rv), 
+  <lv: VALUE> "*" <rv: VALUE> => Expression::Mul(lv, rv), 
+  <lv: VALUE> "/" <rv: VALUE> => Expression::Div(lv, rv), 
+  <lv: VALUE> "%" <rv: VALUE> => Expression::Mod(lv, rv), 
+};
+
+// TODO:
+ARGS: Args = {};
+
+// TODO:
+ARGS_DECL: Args_Decl = {};
+
+// TODO:
+DECLARATIONS: Declarations = {};
+
+PROC_CALL: Proc_Call = {
+  <p: PID> "(" <a: ARGS> ")" => Proc_Call(p, a),
+};
+
+PROC_HEAD: Proc_Head = {
+  <p: PID> "(" <a: ARGS_DECL> ")" => Proc_Head(p, a),
 };
 
 
 
-VALUE: VALUE
 
-NUM: i64 = <s:r"[0-9]+" => i64::from_str(s).unwrap();
+
+
