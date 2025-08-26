@@ -42,14 +42,44 @@ EXPRESSION: Expression = {
   <lv: VALUE> "%" <rv: VALUE> => Expression::Mod(lv, rv), 
 };
 
-// TODO:
-ARGS: Args = {};
+// https://lalrpop.github.io/lalrpop/tutorial/006_macros.html
+ARGS: Args = {
+  <mut v:(<PID> ",")*> <e: PID?> => match e {
+    None => v,
+    Some(e) => {
+      v.push(e);
+      return v;
+    }
+  },
+};
 
 // TODO:
-ARGS_DECL: Args_Decl = {};
+ARGS_DECL: Args_Decl = {
+  <mut v: ARGS_DECL> "," <p: PID> => {
+    v.push(Arg_Decl::Basic(p));
+    return v;
+  },
+  <mut v: ARGS_DECL> "," "T" <p: PID> => {
+    v.push(Arg_Decl::Tab(p));
+    return v;
+  },
+  <p: PID> => vec![Arg_Decl::Basic(p)],
+  "T" <p: PID> => vec![Arg_Decl::Tab(p)],
+};
 
 // TODO:
-DECLARATIONS: Declarations = {};
+DECLARATIONS: Declarations = {
+  <mut v:DECLARATIONS> "," <p: PID> => {
+    v.push(Declaration::Basic(p));
+    return v;
+  },
+  <mut v:DECLARATIONS> "," <p: PID> "[" <n: NUM> "]" => {
+    v.push(Declaration:Array(p, n));
+    return v;
+  },
+  <p: PID> => vec![Declaration::Basic(p)],
+  <p: PID> "[" <n: NUM> "]" => vec![Declaration::Array(p, n)],
+};
 
 PROC_CALL: Proc_Call = {
   <p: PID> "(" <a: ARGS> ")" => Proc_Call(p, a),
@@ -59,6 +89,85 @@ PROC_HEAD: Proc_Head = {
   <p: PID> "(" <a: ARGS_DECL> ")" => Proc_Head(p, a),
 };
 
+COMMAND: Command = {
+  <i: IDENTIFIER> ":=" <e: EXPRESSION> ";" => Command::Assign(i, e,
+  "IF" <c: CONDITION> "THEN" <coml: COMMANDS> "ELSE" <comr: COMMANDS> "ENDIF" => Command::If(c, coml, Some(comr)),
+  "IF" <c: CONDITION> "THEN" <com: COMMANDS> "ENDIF" => Command::If(c, com, None),
+  "WHILE" <c: CONDITION> "DO" <com: COMMANDS> "ENDWHILE" => Command::While(c, comm),
+  "REPEAT" <com: COMMANDS> "UNTIL" <c: CONDITION> ";" => Command::Repeat(com, c),
+  <p: PROC_CALL> ";" => Command::Call(p),
+  "READ" <i: IDENTIFIER> ";" => Command::Read(i),
+  "WRITE" <v: VALUE> ";" => Command::Write(v), 
+};
+
+// TODO:
+COMMANDS: Commands = {
+  <mut v: COMMANDS> <c: COMMAND> => {
+    v.push(c);
+    return v;
+  },
+  <c: COMMAND> => vec![c],
+};
+
+MAIN: Main = {
+  "PROGRAM" "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => Main(d, c), 
+};
+
+// TODO: ????????
+PROCEDURES: Procedures = {
+  <mut p: PROCEDURES> "PROCEDURE" <pc: PROC_HEAD> "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => {
+    p.push(Procedure(pc, d, c));
+    return p;
+  },
+  "PROCEDURE" <pc: PROC_HEAD> "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => vec![Procedure(pc, d, c)],
+};
+
+pub PROGRAM_ALL: Program_All = {
+  <p: PROCEDURES?> <m: MAIN> => Program_All(p, m),
+};
+
+match {
+    "+",
+    "-",
+    "*",
+    "/",
+    "%",
+    "=",
+    "!=",
+    ">",
+    "<",
+    ">=",
+    "<=",
+    ",",
+    "T",
+    r"[0-9]+",
+    r"[_a-z]+",
+    "[",
+    "]",
+    "(",
+    ")",
+    ":=",
+    "IF",
+    "THEN",
+    "ELSE",
+    "ENDIF",
+    "WHILE",
+    "DO",
+    "ENDWHILE",
+    "REPEAT",
+    "UNTIL",
+    ";",
+    "READ",
+    "WRITE",
+    "PROGRAM",
+    "IS",
+    "IN",
+    "END",
+    "PROCEDURE",
+    "\n" => {},
+    r"\s*" => {}, // whitespaces
+    r"#[^\n\r]*[\n\r]*" => {}, // comments
+}
 
 
 
