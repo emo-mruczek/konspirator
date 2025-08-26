@@ -56,7 +56,7 @@ pub enum Condition {
 
 pub enum Expression {
     Val {
-        val: Val,
+        val: Value,
     },
     Add {
         l: Value,
@@ -161,7 +161,7 @@ pub struct Procedure {
 pub type Procedures = Vec<Procedure>;
 
 // https://doc.rust-lang.org/std/option/ cuz can or cannot be (Some, None)
-pub struct Programm_All {
+pub struct Program_All {
     pub procedures: Option<Procedures>,
     pub main: Main,
 }

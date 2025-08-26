@@ -6,40 +6,40 @@ use ast::*;
 grammar;
 
 NUM: Num = {
-  <s: r"[0-9]+" => Num(i64::from_str(s).unwrap());
+  <s: r"[0-9]+" => i64::from_str(s).unwrap();
 }
 
 PID: PID = {
-  <s: r"[_a-z]+"> => PID(s.to_string().unwrap()),
+  <s: r"[_a-z]+"> => s.to_string(),
 };
 
 IDENTIFIER: Identifier = {
-  <p: PID> => Identifier::Base(p),
-  <p: PID> "[" <n: NUM> "]" => Identifier::Array(p, n),
-  <pl: PID> "[" <pr: PID> "]" => Identifier::VLA(pl, pr),
+  <p: PID> => Identifier::Basic{name: p},
+  <p: PID> "[" <n: NUM> "]" => Identifier::Array{name: p, size: n},
+  <pl: PID> "[" <pr: PID> "]" => Identifier::VLA{name: pl, size: pr},
 };
 
 VALUE: Value = {
-  <n: NUM> => Value::Num(n),
-  <i: IDENTIFIER> => Value::Var(i),
+  <n: NUM> => Value::Num{val: n},
+  <i: IDENTIFIER> => Value::Var{val: i},
 };
 
 CONDITION: Condition = {
-  <lv: VALUE> "=" <rv: VALUE> => Condition::Equal(lv, rv),
-  <lv: VALUE> "!=" <rv: VALUE> => Condition::NotEqual(lv, rv),
-  <lv: VALUE> ">" <rv: VALUE> => Condition::Greater(lv, rv),
-  <lv: VALUE> "<" <rv: VALUE> => Condition::Less(lv, rv),
-  <lv: VALUE> ">=" <rv: VALUE> => Condition::GreaterEqual(lv, rv),
-  <lv: VALUE> "<=" <rv: VALUE> => Condition::LessEqual(lv, rv),
+  <lv: VALUE> "=" <rv: VALUE> => Condition::Equal{l: lv,r: rv},
+  <lv: VALUE> "!=" <rv: VALUE> => Condition::NotEqual{l: lv,r: rv},
+  <lv: VALUE> ">" <rv: VALUE> => Condition::Greater{l: lv,r: rv},
+  <lv: VALUE> "<" <rv: VALUE> => Condition::Less{l: lv, r: rv},
+  <lv: VALUE> ">=" <rv: VALUE> => Condition::GreaterEqual{ l: lv,r: rv},
+  <lv: VALUE> "<=" <rv: VALUE> => Condition::LessEqual{l: lv,r: rv},
 };
 
 EXPRESSION: Expression = {
-  <lv: VALUE> => Expression::Val(lv), 
-  <lv: VALUE> "+" <rv: VALUE> => Expression::Add(lv, rv), 
-  <lv: VALUE> "-" <rv: VALUE> => Expression::Sub(lv, rv), 
-  <lv: VALUE> "*" <rv: VALUE> => Expression::Mul(lv, rv), 
-  <lv: VALUE> "/" <rv: VALUE> => Expression::Div(lv, rv), 
-  <lv: VALUE> "%" <rv: VALUE> => Expression::Mod(lv, rv), 
+  <lv: VALUE> => Expression::Val { val: lv }, 
+  <lv: VALUE> "+" <rv: VALUE> => Expression::Add {l: lv,r: rv}, 
+  <lv: VALUE> "-" <rv: VALUE> => Expression::Sub {l: lv,r: rv}, 
+  <lv: VALUE> "*" <rv: VALUE> => Expression::Mul {l: lv,r: rv}, 
+  <lv: VALUE> "/" <rv: VALUE> => Expression::Div {l: lv,r: rv}, 
+  <lv: VALUE> "%" <rv: VALUE> => Expression::Mod {l: lv,r: rv}, 
 };
 
 // https://lalrpop.github.io/lalrpop/tutorial/006_macros.html
@@ -56,48 +56,48 @@ ARGS: Args = {
 // TODO:
 ARGS_DECL: Args_Decl = {
   <mut v: ARGS_DECL> "," <p: PID> => {
-    v.push(Arg_Decl::Basic(p));
+    v.push(Arg_Decl::Basic{name: p});
     return v;
   },
   <mut v: ARGS_DECL> "," "T" <p: PID> => {
-    v.push(Arg_Decl::Tab(p));
+    v.push(Arg_Decl::Tab{name: p});
     return v;
   },
-  <p: PID> => vec![Arg_Decl::Basic(p)],
-  "T" <p: PID> => vec![Arg_Decl::Tab(p)],
+  <p: PID> => vec![Arg_Decl::Basic{name: p}],
+  "T" <p: PID> => vec![Arg_Decl::Tab{name: p}],
 };
 
 // TODO:
 DECLARATIONS: Declarations = {
   <mut v:DECLARATIONS> "," <p: PID> => {
-    v.push(Declaration::Basic(p));
+    v.push(Declaration::Basic{name: p});
     return v;
   },
   <mut v:DECLARATIONS> "," <p: PID> "[" <n: NUM> "]" => {
-    v.push(Declaration:Array(p, n));
+    v.push(Declaration::Array{name: p, num: n});
     return v;
   },
-  <p: PID> => vec![Declaration::Basic(p)],
-  <p: PID> "[" <n: NUM> "]" => vec![Declaration::Array(p, n)],
+  <p: PID> => vec![Declaration::Basic{name: p}],
+  <p: PID> "[" <n: NUM> "]" => vec![Declaration::Array{name: p, num: n}],
 };
 
 PROC_CALL: Proc_Call = {
-  <p: PID> "(" <a: ARGS> ")" => Proc_Call(p, a),
+  <p: PID> "(" <a: ARGS> ")" => Proc_Call{name: p, args: a},
 };
 
 PROC_HEAD: Proc_Head = {
-  <p: PID> "(" <a: ARGS_DECL> ")" => Proc_Head(p, a),
+  <p: PID> "(" <a: ARGS_DECL> ")" => Proc_Head{name: p, args_decl: a},
 };
 
 COMMAND: Command = {
-  <i: IDENTIFIER> ":=" <e: EXPRESSION> ";" => Command::Assign(i, e,
-  "IF" <c: CONDITION> "THEN" <coml: COMMANDS> "ELSE" <comr: COMMANDS> "ENDIF" => Command::If(c, coml, Some(comr)),
-  "IF" <c: CONDITION> "THEN" <com: COMMANDS> "ENDIF" => Command::If(c, com, None),
-  "WHILE" <c: CONDITION> "DO" <com: COMMANDS> "ENDWHILE" => Command::While(c, comm),
-  "REPEAT" <com: COMMANDS> "UNTIL" <c: CONDITION> ";" => Command::Repeat(com, c),
-  <p: PROC_CALL> ";" => Command::Call(p),
-  "READ" <i: IDENTIFIER> ";" => Command::Read(i),
-  "WRITE" <v: VALUE> ";" => Command::Write(v), 
+  <i: IDENTIFIER> ":=" <e: EXPRESSION> ";" => Command::Assign{name: i, expr: e},
+  "IF" <c: CONDITION> "THEN" <coml: COMMANDS> "ELSE" <comr: COMMANDS> "ENDIF" => Command::If{cond: c, comm: coml, else_comm: Some(comr)},
+  "IF" <c: CONDITION> "THEN" <com: COMMANDS> "ENDIF" => Command::If{cond: c, comm: com, else_comm: None},
+  "WHILE" <c: CONDITION> "DO" <com: COMMANDS> "ENDWHILE" => Command::While{cond: c, comm: com},
+  "REPEAT" <com: COMMANDS> "UNTIL" <c: CONDITION> ";" => Command::Repeat{comm: com, cond: c},
+  <p: PROC_CALL> ";" => Command::Call{call: p},
+  "READ" <i: IDENTIFIER> ";" => Command::Read{name: i},
+  "WRITE" <v: VALUE> ";" => Command::Write{val: v}, 
 };
 
 // TODO:
@@ -110,20 +110,20 @@ COMMANDS: Commands = {
 };
 
 MAIN: Main = {
-  "PROGRAM" "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => Main(d, c), 
+  "PROGRAM" "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => Main{declarations: d, commands: c}, 
 };
 
 // TODO: ????????
 PROCEDURES: Procedures = {
   <mut p: PROCEDURES> "PROCEDURE" <pc: PROC_HEAD> "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => {
-    p.push(Procedure(pc, d, c));
+    p.push(Procedure{proc_head: pc, declarations: d, commands: c});
     return p;
   },
-  "PROCEDURE" <pc: PROC_HEAD> "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => vec![Procedure(pc, d, c)],
+  "PROCEDURE" <pc: PROC_HEAD> "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => vec![Procedure{proc_head: pc, declarations: d, commands: c}],
 };
 
 pub PROGRAM_ALL: Program_All = {
-  <p: PROCEDURES?> <m: MAIN> => Program_All(p, m),
+  <p: PROCEDURES?> <m: MAIN> => Program_All{ procedures: p, main: m},
 };
 
 match {
