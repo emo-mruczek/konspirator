@@ -80,13 +80,9 @@ pub enum Expression {
     },
 }
 
-// TODO
-pub enum Args {
-    
-}
+pub type Args = Vec<PID>;
 
-// TODO:
-pub enum Args_Decl {
+pub enum Arg_Decl {
     Basic {
         name: PID,
     },
@@ -95,8 +91,9 @@ pub enum Args_Decl {
     },
 }
 
-// TODO:
-pub enum Declarations {
+pub type Args_Decl = Vec<Arg_Decl>;
+
+pub enum Declaration {
     Basic {
         name: PID,
     },
@@ -106,18 +103,18 @@ pub enum Declarations {
     },  
 }
 
-// TODO;
-pub type Proc_Call {
+pub type Declarations = Vec<Declaration>;
+
+pub struct Proc_Call {
     name: PID,
-    
+    args: Args,
 }
 
-// TODO:
-pub type Proc_Head {
-
+pub struct Proc_Head {
+    name: PID,
+    args_decl: Args_Decl,
 }
 
-// TODO
 pub enum Command {
     Assign {
         name: Identifier,
@@ -126,6 +123,7 @@ pub enum Command {
     If {
         cond: Condition,
         comm: Commands,
+        else_comm: Option<Commands>,
     },
     While {
         cond: Condition,
@@ -146,24 +144,24 @@ pub enum Command {
     },
 }
 
-// TODO:
-pub enum Commands {
-
-}
+pub type Commands = Vec<Command>;
 
 // they dont have be any declarations
-pub enum Main {
+pub struct Main {
     declarations: Option<Declarations>,
     commands: Commands,
 }
 
-// TODO:
-pub enum Procedures {
-    
+pub struct Procedure {
+    pub proc_head: Proc_Head,
+    pub declarations: Option<Declarations>,
+    pub commands: Commands,
 }
 
+pub type Procedures = Vec<Procedure>;
+
 // https://doc.rust-lang.org/std/option/ cuz can or cannot be (Some, None)
-pub type Programm_All {
-    procedures: Option<Procedures>,
-    main: Main,
+pub struct Programm_All {
+    pub procedures: Option<Procedures>,
+    pub main: Main,
 }

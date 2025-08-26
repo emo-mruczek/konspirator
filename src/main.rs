@@ -1,3 +1,5 @@
+mod ast;
+
 fn main() {
     
     larlpop_mod!(grammar);
