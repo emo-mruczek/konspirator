@@ -34,7 +34,7 @@ CONDITION: Condition = {
 };
 
 EXPRESSION: Expression = {
-  <lv: VALUE> => Expression::Val { val: lv }, 
+  <lv: VALUE> => Expression::Val {val: lv}, 
   <lv: VALUE> "+" <rv: VALUE> => Expression::Add {l: lv,r: rv}, 
   <lv: VALUE> "-" <rv: VALUE> => Expression::Sub {l: lv,r: rv}, 
   <lv: VALUE> "*" <rv: VALUE> => Expression::Mul {l: lv,r: rv}, 
@@ -53,7 +53,6 @@ ARGS: Args = {
   },
 };
 
-// TODO:
 ARGS_DECL: Args_Decl = {
   <mut v: ARGS_DECL> "," <p: PID> => {
     v.push(Arg_Decl::Basic{name: p});
@@ -67,7 +66,6 @@ ARGS_DECL: Args_Decl = {
   "T" <p: PID> => vec![Arg_Decl::Tab{name: p}],
 };
 
-// TODO:
 DECLARATIONS: Declarations = {
   <mut v:DECLARATIONS> "," <p: PID> => {
     v.push(Declaration::Basic{name: p});
@@ -100,7 +98,6 @@ COMMAND: Command = {
   "WRITE" <v: VALUE> ";" => Command::Write{val: v}, 
 };
 
-// TODO:
 COMMANDS: Commands = {
   <mut v: COMMANDS> <c: COMMAND> => {
     v.push(c);
@@ -113,7 +110,6 @@ MAIN: Main = {
   "PROGRAM" "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => Main{declarations: d, commands: c}, 
 };
 
-// TODO: ????????
 PROCEDURES: Procedures = {
   <mut p: PROCEDURES> "PROCEDURE" <pc: PROC_HEAD> "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => {
     p.push(Procedure{proc_head: pc, declarations: d, commands: c});
@@ -168,8 +164,3 @@ match {
     r"\s*" => {}, // whitespaces
     r"#[^\n\r]*[\n\r]*" => {}, // comments
 }
-
-
-
-
-
