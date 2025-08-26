@@ -1,8 +1,9 @@
 mod ast;
+use lalrpop_util::lalrpop_mod;
+lalrpop_mod!(parser);
 
 fn main() {
     
-    larlpop_mod!(grammar);
 
     println!("Hello, world!");
 }

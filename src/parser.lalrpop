@@ -1,13 +1,13 @@
 // https://lalrpop.github.io/lalrpop/tutorial/002_paren_numbers.html
 
 use std::str::FromStr;
-use ast::*;
+use crate::ast::*;
 
 grammar;
 
 NUM: Num = {
-  <s: r"[0-9]+" => i64::from_str(s).unwrap();
-}
+  <s: r"[0-9]+"> => i64::from_str(s).unwrap(),
+};
 
 PID: PID = {
   <s: r"[_a-z]+"> => s.to_string(),
@@ -164,7 +164,7 @@ match {
     "IN",
     "END",
     "PROCEDURE",
-    "\n" => {},
+    "\n" => {}, // prob unnecessary
     r"\s*" => {}, // whitespaces
     r"#[^\n\r]*[\n\r]*" => {}, // comments
 }

@@ -106,13 +106,13 @@ pub enum Declaration {
 pub type Declarations = Vec<Declaration>;
 
 pub struct Proc_Call {
-    name: PID,
-    args: Args,
+    pub name: PID,
+    pub args: Args,
 }
 
 pub struct Proc_Head {
-    name: PID,
-    args_decl: Args_Decl,
+    pub name: PID,
+    pub args_decl: Args_Decl,
 }
 
 pub enum Command {
@@ -148,8 +148,8 @@ pub type Commands = Vec<Command>;
 
 // they dont have be any declarations
 pub struct Main {
-    declarations: Option<Declarations>,
-    commands: Commands,
+    pub declarations: Option<Declarations>,
+    pub commands: Commands,
 }
 
 pub struct Procedure {
