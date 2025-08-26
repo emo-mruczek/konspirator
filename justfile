@@ -1,0 +1,2 @@
+RUSTFLAGS=-Awarnings cargo run
+
