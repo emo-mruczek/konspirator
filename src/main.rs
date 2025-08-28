@@ -1,12 +1,12 @@
 mod ast;
 
 use lalrpop_util::lalrpop_mod;
-use std::{env, fmt, fs, process::exit};
+use std::{env, fmt, fs::{self, File}, io, process::exit};
 use crate::Instruction::*;
 
 lalrpop_mod!(parser);
 
-fn main() {
+fn main() -> io::Result<()> {
     let args: Vec<String> = env::args().collect();
 
     if args.len() != 3 {
@@ -39,17 +39,23 @@ fn main() {
     for instruction in instructions.iter() {
         println!("{}", instruction); 
     }
+
+    // https://stackoverflow.com/questions/63713887/how-to-write-string-to-file
+    let mut output_code = File::create(out_name)?;
 }
 
-// progams ends with HALT
-// vector with instructions to write as an output
+
+
+
+
+// TODO: move to other file 
+
+/* instructions */
 
 // for easy printing instructions
 impl fmt::Display for Instruction {
      fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            // probably shoud not leave _ for instructions with position due to possible bugs, but
-            // idc
             READ | WRITE | HALT => write!(f, "{:?}", self),
             LOAD {pos} => write!(f, "{} {}", "LOAD", pos),
             STORE {pos} => write!(f, "{} {}", "STORE", pos),
