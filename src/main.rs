@@ -1,7 +1,8 @@
 mod ast;
 
 use lalrpop_util::lalrpop_mod;
-use std::{env, fs, process::exit};
+use std::{env, fmt, fs, process::exit};
+use crate::Instruction::*;
 
 lalrpop_mod!(parser);
 
@@ -28,43 +29,100 @@ fn main() {
 
     // compilu compilu
 
-    instructions.push(Instruction::HALT);
+    instructions.push(LOAD{pos: 1});
+    instructions.push(HALT);
 
     // printu printu compiled code
 
     println!(" Compiled code:\n");
 
     for instruction in instructions.iter() {
-        println!("{:?}", instruction); 
+        println!("{}", instruction); 
     }
 }
 
 // progams ends with HALT
 // vector with instructions to write as an output
 
+// for easy printing instructions
+impl fmt::Display for Instruction {
+     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            // probably shoud not leave _ for instructions with position due to possible bugs, but
+            // idc
+            READ | WRITE | HALT => write!(f, "{:?}", self),
+            LOAD {pos} => write!(f, "{} {}", "LOAD", pos),
+            STORE {pos} => write!(f, "{} {}", "STORE", pos),
+            ADD {pos} => write!(f, "{} {}", "ADD", pos),
+            SUB {pos} => write!(f, "{} {}", "SUB", pos),
+            GET {pos} => write!(f, "{} {}", "GET", pos),
+            PUT {pos} => write!(f, "{} {}", "PUT", pos),
+            RST {pos} => write!(f, "{} {}", "RST", pos),
+            INC {pos} => write!(f, "{} {}", "INC", pos),
+            DEC {pos} => write!(f, "{} {}", "DEC", pos),
+            SHL {pos} => write!(f, "{} {}", "SHL", pos),
+            SHR {pos} => write!(f, "{} {}", "SHR", pos),
+            JUMP {pos} => write!(f, "{} {}", "JUMP", pos),
+            JPOS {pos} => write!(f, "{} {}", "JPOS", pos),
+            JZERO {pos} => write!(f, "{} {}", "JZERO", pos),
+            JUMPR {pos} => write!(f, "{} {}", "JUMPR", pos),
+            STRK {pos} => write!(f, "{} {}", "STRK", pos),
+        }
+    }
+}
 
-
-// add strings?
 #[derive(Debug)] // in order to be able to print it
 enum Instruction {
     READ,
     WRITE,
-    LOAD,
-    STORE,
-    ADD,
-    SUB,
-    GET,
-    PUT,
-    RST,
-    INC,
-    DEC,
-    SHL,
-    SHR,
-    JUMP,
-    JPOS,
-    JZERO,
-    STRK,
-    JUMPR,
+    LOAD {
+        pos: u64, 
+    },
+    STORE {
+        pos: u64, 
+    },
+    ADD {
+        pos: u64, 
+    },
+    SUB {
+        pos: u64, 
+    },
+    GET {
+        pos: u64, 
+    },
+    PUT {
+        pos: u64, 
+    },
+    RST {
+        pos: u64, 
+    },
+    INC {
+        pos: u64, 
+    },
+    DEC {
+        pos: u64, 
+    },
+    SHL {
+        pos: u64, 
+    },
+    SHR {
+        pos: u64, 
+    },
+    JUMP {
+        pos: u64, 
+    },
+    JPOS {
+        pos: u64, 
+    },
+    JZERO {
+        pos: u64, 
+    },
+    STRK {
+        pos: u64, 
+    },
+    JUMPR {
+        pos: u64, 
+    },
     HALT,
 }
 
