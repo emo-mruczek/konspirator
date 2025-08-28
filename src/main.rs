@@ -1,7 +1,7 @@
 mod ast;
 
 use lalrpop_util::lalrpop_mod;
-use std::{env, fmt, fs::{self, File}, io, process::exit};
+use std::{env, fmt, io::{self, Write}, fs::{self, File}, process::exit};
 use crate::Instruction::*;
 
 lalrpop_mod!(parser);
@@ -33,7 +33,6 @@ fn main() -> io::Result<()> {
     instructions.push(HALT);
 
     // printu printu compiled code
-
     println!(" Compiled code:\n");
 
     for instruction in instructions.iter() {
@@ -42,6 +41,12 @@ fn main() -> io::Result<()> {
 
     // https://stackoverflow.com/questions/63713887/how-to-write-string-to-file
     let mut output_code = File::create(out_name)?;
+    
+    for instruction in instructions.iter() {
+        write!(output_code, "{}\n", instruction)?;
+    }
+
+    return Ok(());
 }
 
 
