@@ -20,7 +20,7 @@ fn main() {
 
     let input_code = fs::read_to_string(in_name).expect("\x1b[31mCouldn't read the input file\x1b[0m");
 
-    println!(" Compiling:\n\n {}", input_code);
+    println!("\n Compiling:\n\n {}", input_code);
 
     let mut instructions: Vec<Instruction> = vec![]; 
 
@@ -31,12 +31,21 @@ fn main() {
     instructions.push(Instruction::HALT);
 
     // printu printu compiled code
+
+    println!(" Compiled code:\n");
+
+    for instruction in instructions.iter() {
+        println!("{:?}", instruction); 
+    }
 }
 
 // progams ends with HALT
 // vector with instructions to write as an output
 
+
+
 // add strings?
+#[derive(Debug)] // in order to be able to print it
 enum Instruction {
     READ,
     WRITE,
