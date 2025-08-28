@@ -22,7 +22,40 @@ fn main() {
 
     println!(" Compiling:\n\n {}", input_code);
 
+    let mut instructions: Vec<Instruction> = vec![]; 
+
     parser::PROGRAM_ALLParser::new().parse(&input_code).unwrap();
 
+    // compilu compilu
 
+    instructions.push(Instruction::HALT);
+
+    // printu printu compiled code
 }
+
+// progams ends with HALT
+// vector with instructions to write as an output
+
+// add strings?
+enum Instruction {
+    READ,
+    WRITE,
+    LOAD,
+    STORE,
+    ADD,
+    SUB,
+    GET,
+    PUT,
+    RST,
+    INC,
+    DEC,
+    SHL,
+    SHR,
+    JUMP,
+    JPOS,
+    JZERO,
+    STRK,
+    JUMPR,
+    HALT,
+}
+
