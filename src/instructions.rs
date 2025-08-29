@@ -16,6 +16,15 @@ pub enum Register {
     H,
 }
 
+impl fmt::Display for Register {
+
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            A | B | C | D | E | F | G | H => write!(f, "{:?}", self),
+        }
+    }
+}
+
 // for easy printing instructions
 impl fmt::Display for Instruction {
      fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
