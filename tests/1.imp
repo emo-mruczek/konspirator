@@ -1,0 +1,5 @@
+# Binarna postać liczby 
+PROGRAM IS
+IN
+  WRITE 1
+END
