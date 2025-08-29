@@ -1,8 +1,11 @@
+// TODO: get rid of warnings
+
 mod ast;
 
 use lalrpop_util::lalrpop_mod;
 use std::{env, fmt, io::{self, Write}, fs::{self, File}, process::exit};
 use crate::Instruction::*;
+use crate::ast::*;
 
 lalrpop_mod!(parser);
 
@@ -25,12 +28,16 @@ fn main() -> io::Result<()> {
 
     let mut instructions: Vec<Instruction> = vec![]; 
 
-    parser::PROGRAM_ALLParser::new().parse(&input_code).unwrap();
+    let program = parser::PROGRAM_ALLParser::new().parse(&input_code);
 
-    // compilu compilu
-
-    instructions.push(LOAD{pos: 1});
-    instructions.push(HALT);
+    match program {
+        Ok(p) => {
+            println!(" Successfully parsed");
+            let compiler: Compiler = Compiler::new(p);
+            instructions = compiler.compile();
+        },
+        Err(_) => panic!("Something wrong!"), // TODO: for now
+    };
 
     // printu printu compiled code
     println!(" Compiled code:\n");
@@ -49,9 +56,24 @@ fn main() -> io::Result<()> {
     return Ok(());
 }
 
+pub struct Compiler {
+    program: Program_All,
+    instructions: Vec<Instruction>,
+}
 
+impl Compiler {
+    pub fn new(program: Program_All) -> Self {
+        Self {
+            program: program,
+            instructions: vec![],
+        }
+    }
 
-
+    pub fn compile(mut self) -> Vec<Instruction> {
+        self.instructions.push(HALT);
+        return self.instructions;
+    }
+} 
 
 // TODO: move to other file 
 
