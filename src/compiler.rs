@@ -1,8 +1,8 @@
 /* compiler */
 
 use crate::instructions::Instruction::{self, *};
-use crate::instructions::Register::{self, *};
-use crate::ast::{self, *, Command::*};
+// use crate::instructions::Register::{self, *};
+use crate::ast::{*, Command::*, Value::*,};
 
 // current instruction number can be obtained by checking the length od the instructions vector
 pub struct Compiler {
@@ -37,7 +37,11 @@ impl Compiler {
                 Repeat {comm, cond} => println!("Repeat"),
                 Call {call} => println!("Call"),
                 Read {name} => println!("Read"),
-                Write {val} => println!("Write"),
+                Write {val} => {
+                    print!("Write");
+                    let res = Self::command_write(&val);
+                    self.instructions.extend(res);
+                    },
             }
         }
 
@@ -46,13 +50,23 @@ impl Compiler {
         return self.instructions;
     }
 
-    fn CommandWrite(val: i64) {
+    // can be optimized but its irrevelant rn when there arent the exact instructions about this
+    // years compilator
+    fn command_write(val: &Value) -> Vec<Instruction> {
+        let mut res = vec![];
+        // two cases
+        // val is a i64
+        // val is a var
         
+        match val {
+            Value::Num {val} => { println!(" num");
+                res.push(WRITE);               
+            }, 
+            Var {val} => println!("var"),
+        }
+
+        return res; 
     }
-
-
-
-
 }
 
 

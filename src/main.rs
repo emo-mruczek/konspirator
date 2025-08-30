@@ -36,7 +36,7 @@ fn main() -> io::Result<()> {
     let mut instructions: Vec<Instruction> = vec![]; 
     match program {
         Ok(p) => {
-            println!(" Successfully parsed");
+            println!(" Successfully parsed\n");
             let compiler: Compiler = Compiler::new(p);
             instructions = compiler.compile();
         },
@@ -45,7 +45,7 @@ fn main() -> io::Result<()> {
 
     /* output */
 
-    println!(" Compiled code:\n");
+    println!("\n Compiled code:\n");
 
     for instruction in instructions.iter() {
         println!("{}", instruction); 
