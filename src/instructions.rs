@@ -19,8 +19,9 @@ pub enum Register {
 impl fmt::Display for Register {
 
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let letter = format!("{:?}", self);
         match self {
-            A | B | C | D | E | F | G | H => write!(f, "{:?}", self),
+            A | B | C | D | E | F | G | H => write!(f, "{}", letter.to_lowercase()),
         }
     }
 }
