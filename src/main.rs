@@ -31,7 +31,7 @@ fn main() -> io::Result<()> {
 
     println!("\n Compiling:\n\n {}", input_code);
 
-    let program = parser::PROGRAM_ALLParser::new().parse(&input_code);
+    let program = parser::PROGRAMALLParser::new().parse(&input_code);
 
     let mut instructions: Vec<Instruction> = vec![]; 
     match program {

@@ -1,6 +1,6 @@
 # Binarna postać liczby 
 PROGRAM IS
-
+  n
 IN
-   WRITE 1;
+   READ n;
 END

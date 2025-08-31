@@ -1,6 +1,6 @@
 // https://lalrpop.github.io/lalrpop/tutorial/005_building_asts.html
 
-pub type Num = i64;
+pub type Num = u64;
 
 pub type PID = String;
 
@@ -82,7 +82,7 @@ pub enum Expression {
 
 pub type Args = Vec<PID>;
 
-pub enum Arg_Decl {
+pub enum ArgDecl {
     Basic {
         name: PID,
     },
@@ -91,7 +91,7 @@ pub enum Arg_Decl {
     },
 }
 
-pub type Args_Decl = Vec<Arg_Decl>;
+pub type ArgsDecl = Vec<ArgDecl>;
 
 pub enum Declaration {
     Basic {
@@ -105,14 +105,14 @@ pub enum Declaration {
 
 pub type Declarations = Vec<Declaration>;
 
-pub struct Proc_Call {
+pub struct ProcCall {
     pub name: PID,
     pub args: Args,
 }
 
-pub struct Proc_Head {
+pub struct ProcHead {
     pub name: PID,
-    pub args_decl: Args_Decl,
+    pub args_decl: ArgsDecl,
 }
 
 pub enum Command {
@@ -134,7 +134,7 @@ pub enum Command {
         cond: Condition,
     },
     Call {
-        call: Proc_Call,
+        call: ProcCall,
     },
     Read {
         name: Identifier,
@@ -153,7 +153,7 @@ pub struct Main {
 }
 
 pub struct Procedure {
-    pub proc_head: Proc_Head,
+    pub proc_head: ProcHead,
     pub declarations: Option<Declarations>,
     pub commands: Commands,
 }
@@ -161,7 +161,7 @@ pub struct Procedure {
 pub type Procedures = Vec<Procedure>;
 
 // https://doc.rust-lang.org/std/option/ cuz can or cannot be (Some, None)
-pub struct Program_All {
+pub struct ProgramAll {
     pub procedures: Option<Procedures>,
     pub main: Main,
 }

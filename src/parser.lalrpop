@@ -6,7 +6,7 @@ use crate::ast::*;
 grammar;
 
 NUM: Num = {
-  <s: r"[0-9]+"> => i64::from_str(s).unwrap(),
+  <s: r"[0-9]+"> => u64::from_str(s).unwrap(),
 };
 
 PID: PID = {
@@ -53,17 +53,17 @@ ARGS: Args = {
   },
 };
 
-ARGS_DECL: Args_Decl = {
-  <mut v: ARGS_DECL> "," <p: PID> => {
-    v.push(Arg_Decl::Basic{name: p});
+ARGSDECL: ArgsDecl = {
+  <mut v: ARGSDECL> "," <p: PID> => {
+    v.push(ArgDecl::Basic{name: p});
     return v;
   },
-  <mut v: ARGS_DECL> "," "T" <p: PID> => {
-    v.push(Arg_Decl::Tab{name: p});
+  <mut v: ARGSDECL> "," "T" <p: PID> => {
+    v.push(ArgDecl::Tab{name: p});
     return v;
   },
-  <p: PID> => vec![Arg_Decl::Basic{name: p}],
-  "T" <p: PID> => vec![Arg_Decl::Tab{name: p}],
+  <p: PID> => vec![ArgDecl::Basic{name: p}],
+  "T" <p: PID> => vec![ArgDecl::Tab{name: p}],
 };
 
 DECLARATIONS: Declarations = {
@@ -79,12 +79,12 @@ DECLARATIONS: Declarations = {
   <p: PID> "[" <n: NUM> "]" => vec![Declaration::Array{name: p, num: n}],
 };
 
-PROC_CALL: Proc_Call = {
-  <p: PID> "(" <a: ARGS> ")" => Proc_Call{name: p, args: a},
+PROCCALL: ProcCall = {
+  <p: PID> "(" <a: ARGS> ")" => ProcCall{name: p, args: a},
 };
 
-PROC_HEAD: Proc_Head = {
-  <p: PID> "(" <a: ARGS_DECL> ")" => Proc_Head{name: p, args_decl: a},
+PROCHEAD: ProcHead = {
+  <p: PID> "(" <a: ARGSDECL> ")" => ProcHead{name: p, args_decl: a},
 };
 
 COMMAND: Command = {
@@ -93,7 +93,7 @@ COMMAND: Command = {
   "IF" <c: CONDITION> "THEN" <com: COMMANDS> "ENDIF" => Command::If{cond: c, comm: com, else_comm: None},
   "WHILE" <c: CONDITION> "DO" <com: COMMANDS> "ENDWHILE" => Command::While{cond: c, comm: com},
   "REPEAT" <com: COMMANDS> "UNTIL" <c: CONDITION> ";" => Command::Repeat{comm: com, cond: c},
-  <p: PROC_CALL> ";" => Command::Call{call: p},
+  <p: PROCCALL> ";" => Command::Call{call: p},
   "READ" <i: IDENTIFIER> ";" => Command::Read{name: i},
   "WRITE" <v: VALUE> ";" => Command::Write{val: v}, 
 };
@@ -111,15 +111,15 @@ MAIN: Main = {
 };
 
 PROCEDURES: Procedures = {
-  <mut p: PROCEDURES> "PROCEDURE" <pc: PROC_HEAD> "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => {
+  <mut p: PROCEDURES> "PROCEDURE" <pc: PROCHEAD> "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => {
     p.push(Procedure{proc_head: pc, declarations: d, commands: c});
     return p;
   },
-  "PROCEDURE" <pc: PROC_HEAD> "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => vec![Procedure{proc_head: pc, declarations: d, commands: c}],
+  "PROCEDURE" <pc: PROCHEAD> "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => vec![Procedure{proc_head: pc, declarations: d, commands: c}],
 };
 
-pub PROGRAM_ALL: Program_All = {
-  <p: PROCEDURES?> <m: MAIN> => Program_All{ procedures: p, main: m},
+pub PROGRAMALL: ProgramAll = {
+  <p: PROCEDURES?> <m: MAIN> => ProgramAll{ procedures: p, main: m},
 };
 
 match {
