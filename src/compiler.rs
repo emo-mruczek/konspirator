@@ -7,11 +7,11 @@ use crate::ast::{*, Command::*, Value::*, Identifier::*};
 
 pub enum Variable {
     Atomic {
-        value: u64,
+        position: u64,
     },
     // TODO:??
     Array {
-        size: u64,
+        position: u64,
         value: u64,
     },
 }
@@ -20,7 +20,8 @@ pub enum Variable {
 pub struct Compiler {
     program: ProgramAll,
     instructions: Vec<Instruction>,
-    memory: HashMap<String, Variable>,
+    stack: HashMap<String, Variable>, // its not a stack i know
+    sp: u64
 }
 
 impl Compiler {
@@ -28,7 +29,8 @@ impl Compiler {
         Self {
             program: program,
             instructions: vec![],
-            memory: HashMap::new(),
+            stack: HashMap::new(),           
+            sp: 0,
         }
     }
 
@@ -41,6 +43,30 @@ impl Compiler {
         // if let Some(command) = self.program.main.commands {
         //
         // }
+
+        // main
+        match self.program.main.declarations {
+            Some(declarations) => {
+                for variable in declarations {
+                    match variable {
+                        Declaration::Basic {name} => { // rename basic to atomic later
+                            print!(" basic ");
+                            self.stack.insert(name, Variable::Atomic{position: self.sp});
+                            self.sp += 1;
+                        },
+                        Declaration::Array {name, num} => { // rename num to size later 
+                            print!(" array ");
+                            self.stack.insert(name, Variable::Array {position: self.sp, value: num});
+                            self.sp += num;
+                        },
+                    } 
+                }
+                println!();
+            },
+            None => {
+                println!("no variable declarations in Main");
+            }
+        }
         
         for command in self.program.main.commands {
             match command {
