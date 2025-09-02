@@ -40,13 +40,11 @@ impl Compiler {
                     match variable {
                         Declaration::Basic {name} => {
                             // rename basic to atomic later
-                            print!(" basic ");
                             self.stack.insert(name, Variable::Atomic {position: self.sp});
                             self.sp += 1;
                         }
                         Declaration::Array {name, num} => {
                             // rename num to size later
-                            print!(" array ");
                             self.stack.insert(name, Variable::Array {position: self.sp, value: num});
                             self.sp += num;
                         }
@@ -62,7 +60,6 @@ impl Compiler {
         for command in self.program.main.commands {
             match command {
                 Assign {name, expr} => {
-                    println!("Assign");
                     let res = Self::command_assign(&name, &expr, &mut self.initialized, &self.stack);
                     self.instructions.extend(res);
                 }
@@ -71,12 +68,10 @@ impl Compiler {
                 Repeat {comm, cond} => println!("Repeat"),
                 Call {call} => println!("Call"),
                 Read {name} => {
-                    print!("Read");
                     let res = Self::command_read(&name, &mut self.initialized, &self.stack);
                     self.instructions.extend(res);
                 }
                 Write {val} => {
-                    print!("Write");
                     let res = Self::command_write(&val, &self.stack);
                     self.instructions.extend(res);
                 }
@@ -89,117 +84,80 @@ impl Compiler {
 
     fn command_assign(id: &Identifier, expression: &Expression, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
-        let n: String;
 
-        match id {
-            Basic {name} => {
-                println!(" basic");
-                n = name.clone(); //TODO: ask
-
-                let var = stack.get(&n).unwrap(); // undeclared variable error todoA
-
-                res.extend(Self::handle_variable(var));
-            }
-            Array {name, size} => todo!(),
-            VLA {name, size} => todo!(),
-        }
-        initialized.insert(n); // put it at the end of a scope
+        res.extend(Self::get_variable(id, stack));
 
         res.push(PUT {pos: B});
 
         // check if initialized
 
         res.push(STORE {pos: B});
+        
+        initialized.insert(Self::get_name(id)); 
+
         return res;
     }
 
     fn command_read(id: &Identifier, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
 
         let mut res: Vec<Instruction> = vec![];
-        let mut n: String;
 
-        match id {
-            Basic { name } => {
-                println!(" basic");
-                n = name.clone(); //TODO: ask
-
-                let var = stack.get(&n).unwrap(); // undeclared variable error todoA
-
-                res.extend(Self::handle_variable(var));
-            }
-            Array {name, size} => {
-                println!(" array");
-                n = name.clone();
-            }
-            VLA {name, size} => {
-                println!(" vla");
-                n = name.clone();
-            }
-        }
-
-        initialized.insert(n); // put it at the end of a scope
-
-        // where is the variable stored?
+        res.extend(Self::get_variable(id, stack));
 
         res.push(PUT {pos: B});
         res.push(READ);
         res.push(STORE {pos: B});
 
+        initialized.insert(Self::get_name(&id)); 
+
         return res;
     }
 
-    // can be optimized but its irrevelant rn when there arent the exact instructions about this
-    // years compilator
-    // maybe something with into what register should i insert?
     fn command_write(val: &Value, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
-        // two cases
-        // val is a i64
-        // val is a var
 
         match val {
             Value::Num {val} => {
-                println!(" num");
-                let mut status: u64 = *val;
-                res.push(RST {pos: A}); // A = 0
-                if *val > 0 {
-                    while status > 0 {
-                        res.push(INC {pos: A});
-                        status -= 1;
-                    }
-                }
+                res.extend(Self::set_reg_a(*val));
             }
             Value::Var {val} => {
-                println!(" var");
-                let n: String;
-                match val {
-                    Basic { name } => {
-                        println!(" basic");
-                        n = name.clone(); //TODO: ask
-
-                        let var = stack.get(&n).unwrap(); // undeclared variable error todoA
-
-                        res.extend(Self::handle_variable(var));
-
-                        res.push(LOAD {pos: A});
-                    }
-                    Array {name, size} => {
-                        println!(" array");
-                        n = name.clone();
-                    }
-                    VLA {name, size} => {
-                        println!(" vla");
-                        n = name.clone();
-                    }
-                }
+                res.extend(Self::get_variable(val, stack));
             }
         }
 
+        res.push(LOAD {pos: A});
         res.push(WRITE);
         return res;
     }
 
     /* helpers */
+
+    fn get_name(id: &Identifier) -> String {
+        let name = match id {
+            Basic {name} => name,
+            Array {name, size} => name,
+            VLA {name, size} => name,
+        };
+
+        return name.clone();
+    }
+
+    fn get_variable(id: &Identifier, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+
+        match id {
+            Basic {name} => {
+                let var = stack.get(name).unwrap(); // undeclared variable error todoA
+                res.extend(Self::handle_variable(var));
+            }
+            Array {name, size} => {
+            }
+            VLA {name, size} => {
+            }
+        }
+
+        return res;
+    }
 
     fn handle_variable(var: &Variable) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
