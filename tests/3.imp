@@ -1,7 +1,15 @@
 # Binarna postać liczby 
 PROGRAM IS
-  n
+  n, w, o
 IN
    READ n;
+   READ w;
+   READ o;
+   WRITE n;
+   WRITE w;
+   WRITE o;
+   READ w;
+   WRITE o;
+   WRITE w;
    WRITE n;
 END

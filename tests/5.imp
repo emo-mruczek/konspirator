@@ -1,0 +1,13 @@
+# Binarna postać liczby 
+PROGRAM IS
+  n, p
+IN
+   n := 5;
+   WRITE n;
+   n := 10;
+   WRITE n;
+   READ n;
+   WRITE n;
+   p := n;
+   WRITE p;
+END

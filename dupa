@@ -1,8 +1,71 @@
 RST a
 PUT b
-READ
+RST a
+INC a
+INC a
+PUT c
+RST a
+INC a
+ADD c
 STORE b
 RST a
+INC a
+PUT b
+RST a
+INC a
+INC a
+INC a
+PUT c
+RST a
+LOAD a
+ADD c
+STORE b
+RST a
+INC a
+INC a
+PUT b
+RST a
+INC a
+LOAD a
+PUT c
+RST a
+INC a
+INC a
+INC a
+INC a
+ADD c
+STORE b
+RST a
+INC a
+INC a
+INC a
+PUT b
+RST a
+INC a
+INC a
+LOAD a
+PUT c
+RST a
+INC a
+LOAD a
+ADD c
+STORE b
+RST a
+LOAD a
+WRITE
+RST a
+INC a
+LOAD a
+WRITE
+RST a
+INC a
+INC a
+LOAD a
+WRITE
+RST a
+INC a
+INC a
+INC a
 LOAD a
 WRITE
 HALT

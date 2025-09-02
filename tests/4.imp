@@ -1,0 +1,13 @@
+# Binarna postać liczby 
+PROGRAM IS
+  b, d, j, q 
+IN
+   b := 2 + 1;
+   d := 3 + b;
+   j := d + 4;
+   q := j + d;
+   WRITE b;
+   WRITE d;
+   WRITE j;
+   WRITE q;
+END

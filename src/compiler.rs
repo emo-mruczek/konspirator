@@ -1,13 +1,12 @@
 /* compiler */
 
-use crate::ast::{Command::*, Identifier::*, Value::*, *};
+use crate::ast::{Command::*, Identifier::*, Value::*, Expression::*, *};
 use crate::instructions::Instruction::{self, *};
 use crate::instructions::Register::*;
 use std::collections::{HashMap, HashSet};
 
 pub enum Variable {
     Atomic {position: u64},
-    // TODO:??
     Array {position: u64, value: u64},
 }
 
@@ -89,7 +88,7 @@ impl Compiler {
 
         res.push(PUT {pos: B});
 
-        // check if initialized
+        res.extend(Self::handle_expression(expression, initialized, stack));
 
         res.push(STORE {pos: B});
         
@@ -116,21 +115,73 @@ impl Compiler {
     fn command_write(val: &Value, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
 
-        match val {
-            Value::Num {val} => {
-                res.extend(Self::set_reg_a(*val));
-            }
-            Value::Var {val} => {
-                res.extend(Self::get_variable(val, stack));
-            }
-        }
+        res.extend(Self::handle_value(val, stack));
 
-        res.push(LOAD {pos: A});
         res.push(WRITE);
         return res;
     }
 
+    /* expression handling */
+
+    // check if initialized if expression has a variables
+
+    fn handle_expression(expression: &Expression, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+        
+        match expression {
+            Val {val} => {
+                Self::is_initialized(&val, initialized);
+
+                res.extend(Self::handle_value(val, stack));
+            },
+            Add {l, r} => {
+                Self::is_initialized(&l, initialized);
+                Self::is_initialized(&r, initialized);
+
+                //TODO: perform addition in compile-time to reduce number of instructions
+                
+                res.extend(Self::handle_value(l, stack));
+                res.push(PUT {pos: C});
+                res.extend(Self::handle_value(r, stack));
+                res.push(ADD {pos: C});
+            },
+            Sub {l, r} => todo!(),
+            Mul {l, r} => todo!(),
+            Div {l, r} => todo!(),
+            Mod {l, r} => todo!(),
+        }
+
+        return res;
+    }
+
     /* helpers */
+
+    fn handle_value(val: &Value, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+
+        match val {
+            Value::Num {val} => {
+                res.extend(Self::set_reg_a(*val));
+            },
+            Value::Var {val} => {
+                res.extend(Self::get_variable(val, &stack));
+                res.push(LOAD {pos: A});
+            },
+        }
+
+        return res;
+    }
+
+    fn is_initialized(val: &Value, initialized: &mut HashSet<String>) {
+        match val {
+            Value::Num {val} => {},
+            Value::Var {val} => {
+                if !initialized.contains(&Self::get_name(val)) {
+                    panic!("not initialized"); // TODO: handling
+                }
+            }
+        }
+    }
 
     fn get_name(id: &Identifier) -> String {
         let name = match id {
