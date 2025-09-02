@@ -1,19 +1,14 @@
 /* compiler */
 
-use std::collections::{HashMap, HashSet};
+use crate::ast::{Command::*, Identifier::*, Value::*, *};
 use crate::instructions::Instruction::{self, *};
 use crate::instructions::Register::*;
-use crate::ast::{*, Command::*, Value::*, Identifier::*};
+use std::collections::{HashMap, HashSet};
 
 pub enum Variable {
-    Atomic {
-        position: u64,
-    },
+    Atomic {position: u64},
     // TODO:??
-    Array {
-        position: u64,
-        value: u64,
-    },
+    Array {position: u64, value: u64},
 }
 
 // current instruction number can be obtained by checking the length od the instructions vector
@@ -30,17 +25,16 @@ impl Compiler {
         Self {
             program: program,
             instructions: vec![],
-            stack: HashMap::new(),           
+            stack: HashMap::new(),
             sp: 0,
             initialized: HashSet::new(),
         }
     }
 
     pub fn compile(mut self) -> Vec<Instruction> {
-
         // firstly compile procedures i guess
-        // then compile main and insert procedures 
-        
+        // then compile main and insert procedures
+
         // declarations may be None
         // if let Some(command) = self.program.main.commands {
         //
@@ -51,42 +45,55 @@ impl Compiler {
             Some(declarations) => {
                 for variable in declarations {
                     match variable {
-                        Declaration::Basic {name} => { // rename basic to atomic later
+                        Declaration::Basic {name} => {
+                            // rename basic to atomic later
                             print!(" basic ");
-                            self.stack.insert(name, Variable::Atomic{position: self.sp});
+                            self.stack
+                                .insert(name, Variable::Atomic {position: self.sp});
                             self.sp += 1;
-                        },
-                        Declaration::Array {name, num} => { // rename num to size later 
+                        }
+                        Declaration::Array {name, num} => {
+                            // rename num to size later
                             print!(" array ");
-                            self.stack.insert(name, Variable::Array {position: self.sp, value: num});
+                            self.stack.insert(
+                                name,
+                                Variable::Array {
+                                    position: self.sp,
+                                    value: num,
+                                },
+                            );
                             self.sp += num;
-                        },
-                    } 
+                        }
+                    }
                 }
                 println!();
-            },
+            }
             None => {
                 println!("no variable declarations in Main");
             }
         }
-        
+
         for command in self.program.main.commands {
             match command {
-                Assign {name, expr} => println!("Assign"),
+                Assign {name, expr} => {
+                    println!("Assign");
+                    let res = Self::command_assign(&name, &expr, &mut self.initialized, &self.stack);
+                    self.instructions.extend(res);
+                }
                 If {cond, comm, else_comm} => println!("If"),
                 While {cond, comm} => println!("While"),
                 Repeat {comm, cond} => println!("Repeat"),
                 Call {call} => println!("Call"),
                 Read {name} => {
                     print!("Read");
-                    let res = Self::command_read(&name, &mut self.initialized, &self.stack );
+                    let res = Self::command_read(&name, &mut self.initialized, &self.stack);
                     self.instructions.extend(res);
-                },
+                }
                 Write {val} => {
                     print!("Write");
                     let res = Self::command_write(&val, &self.stack);
                     self.instructions.extend(res);
-                    },
+                }
             }
         }
 
@@ -94,60 +101,72 @@ impl Compiler {
         return self.instructions;
     }
 
-    // different types od Identifier
-    fn command_read(id: &Identifier, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+    fn command_assign(id: &Identifier, expression: &Expression, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
-        let mut n: String;
-        
-        // three cases 
-        // let id = match later maybe
+        let n: String;
+
         match id {
             Basic {name} => {
                 println!(" basic");
                 n = name.clone(); //TODO: ask
 
                 let var = stack.get(&n).unwrap(); // undeclared variable error todoA
-                
-                match var {
-                    Variable::Atomic {position} => {
-                        let mut status: u64 = *position;
-                        res.push(RST {pos: A}); // A = 0
-                        if *position > 0 {
-                            while status > 0 {
-                                res.push(INC {pos: A});
-                                status -= 1;
-                            }
-                        } 
-                    }
-                    Variable::Array {position, value} => {
-                        println!("problemix"); // error todo
 
-                    }
-                }
+                res.extend(Self::set_reg_a(var));
+            }
+            Array {name, size} => todo!(),
+            VLA {name, size} => todo!(),
+        }
+        initialized.insert(n); // put it at the end of a scope
 
-            },
+        res.push(PUT {pos: B});
+
+        // check if initialized
+
+        res.push(STORE {pos: B});
+        return res;
+    }
+
+    // different types od Identifier
+    fn command_read(
+        id: &Identifier,
+        initialized: &mut HashSet<String>,
+        stack: &HashMap<String, Variable>,
+    ) -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+        let mut n: String;
+
+        // three cases
+        // let id = match later maybe
+        match id {
+            Basic { name } => {
+                println!(" basic");
+                n = name.clone(); //TODO: ask
+
+                let var = stack.get(&n).unwrap(); // undeclared variable error todoA
+
+                res.extend(Self::set_reg_a(var));
+            }
             Array {name, size} => {
                 println!(" array");
                 n = name.clone();
-            },
+            }
             VLA {name, size} => {
                 println!(" vla");
                 n = name.clone();
-            },
+            }
         }
-
-
 
         initialized.insert(n); // put it at the end of a scope
 
         // instrucja read czyta wartosc z zewsnatrz i podstawia pod zmienna
 
         // where is the variable stored?
-        
+
         res.push(PUT {pos: B});
         res.push(READ);
         res.push(STORE {pos: B});
-        
+
         return res;
     }
 
@@ -159,9 +178,9 @@ impl Compiler {
         // two cases
         // val is a i64
         // val is a var
-        
+
         match val {
-            Value::Num {val} => { 
+            Value::Num {val} => {
                 println!(" num");
                 let mut status: u64 = *val;
                 res.push(RST {pos: A}); // A = 0
@@ -170,52 +189,57 @@ impl Compiler {
                         res.push(INC {pos: A});
                         status -= 1;
                     }
-                } 
-            }, 
+                }
+            }
             Value::Var {val} => {
                 println!(" var");
                 let n: String;
                 match val {
-                    Basic {name} => {
+                    Basic { name } => {
                         println!(" basic");
                         n = name.clone(); //TODO: ask
 
                         let var = stack.get(&n).unwrap(); // undeclared variable error todoA
-                
-                        match var {
-                            Variable::Atomic {position} => {
-                            let mut status: u64 = *position;
-                            res.push(RST {pos: A}); // A = 0
-                            if *position > 0 {
-                                while status > 0 {
-                                    res.push(INC {pos: A});
-                                    status -= 1;
-                                    }
-                                } 
-                            }
-                        Variable::Array {position, value} => {
-                            println!("problemix"); // error todo
-                            }
-                        }
+
+                        res.extend(Self::set_reg_a(var));
+
                         res.push(LOAD {pos: A});
-                    },
+                    }
                     Array {name, size} => {
                         println!(" array");
                         n = name.clone();
-                    },
+                    }
                     VLA {name, size} => {
                         println!(" vla");
                         n = name.clone();
-                    },
+                    }
                 }
-            },
+            }
         }
 
-        res.push(WRITE);               
-        return res; 
+        res.push(WRITE);
+        return res;
+    }
+
+    fn set_reg_a(var: &Variable) -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+
+        match var {
+            Variable::Atomic {position} => {
+                let mut status: u64 = *position;
+                res.push(RST {pos: A}); // A = 0
+                if *position > 0 {
+                    while status > 0 {
+                        res.push(INC {pos: A});
+                        status -= 1;
+                    }
+                }
+            }
+            Variable::Array {position, value} => {
+                println!("problemix"); // error todo
+            }
+        }
+
+        return res;
     }
 }
-
-
-
-
