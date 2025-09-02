@@ -1,1 +1,8 @@
+RST a
+PUT b
+READ
+STORE b
+RST a
+LOAD a
+WRITE
 HALT

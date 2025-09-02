@@ -152,7 +152,7 @@ pub struct Main {
     pub commands: Commands,
 }
 
-pub struct Procedure {
+pub struct Procedure { 
     pub proc_head: ProcHead,
     pub declarations: Option<Declarations>,
     pub commands: Commands,

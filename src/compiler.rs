@@ -1,6 +1,6 @@
 /* compiler */
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use crate::instructions::Instruction::{self, *};
 use crate::instructions::Register::*;
 use crate::ast::{*, Command::*, Value::*, Identifier::*};
@@ -21,7 +21,8 @@ pub struct Compiler {
     program: ProgramAll,
     instructions: Vec<Instruction>,
     stack: HashMap<String, Variable>, // its not a stack i know
-    sp: u64
+    sp: u64,
+    initialized: HashSet<String>,
 }
 
 impl Compiler {
@@ -31,6 +32,7 @@ impl Compiler {
             instructions: vec![],
             stack: HashMap::new(),           
             sp: 0,
+            initialized: HashSet::new(),
         }
     }
 
@@ -77,12 +79,12 @@ impl Compiler {
                 Call {call} => println!("Call"),
                 Read {name} => {
                     print!("Read");
-                    let res = Self::command_read(&name);
+                    let res = Self::command_read(&name, &mut self.initialized, &self.stack );
                     self.instructions.extend(res);
                 },
                 Write {val} => {
                     print!("Write");
-                    let res = Self::command_write(&val);
+                    let res = Self::command_write(&val, &self.stack);
                     self.instructions.extend(res);
                     },
             }
@@ -93,29 +95,66 @@ impl Compiler {
     }
 
     // different types od Identifier
-    fn command_read(id: &Identifier) -> Vec<Instruction> {
+    fn command_read(id: &Identifier, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
+        let mut n: String;
         
         // three cases 
+        // let id = match later maybe
         match id {
             Basic {name} => {
                 println!(" basic");
+                n = name.clone(); //TODO: ask
+
+                let var = stack.get(&n).unwrap(); // undeclared variable error todoA
+                
+                match var {
+                    Variable::Atomic {position} => {
+                        let mut status: u64 = *position;
+                        res.push(RST {pos: A}); // A = 0
+                        if *position > 0 {
+                            while status > 0 {
+                                res.push(INC {pos: A});
+                                status -= 1;
+                            }
+                        } 
+                    }
+                    Variable::Array {position, value} => {
+                        println!("problemix"); // error todo
+
+                    }
+                }
+
             },
             Array {name, size} => {
                 println!(" array");
+                n = name.clone();
             },
             VLA {name, size} => {
                 println!(" vla");
+                n = name.clone();
             },
         }
 
+
+
+        initialized.insert(n); // put it at the end of a scope
+
+        // instrucja read czyta wartosc z zewsnatrz i podstawia pod zmienna
+
+        // where is the variable stored?
+        
+        res.push(PUT {pos: B});
+        res.push(READ);
+        res.push(STORE {pos: B});
+        
         return res;
     }
 
     // can be optimized but its irrevelant rn when there arent the exact instructions about this
     // years compilator
     // maybe something with into what register should i insert?
-    fn command_write(val: &Value) -> Vec<Instruction> {
+    fn command_write(val: &Value, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
         // two cases
         // val is a i64
@@ -132,11 +171,47 @@ impl Compiler {
                         status -= 1;
                     }
                 } 
-                res.push(WRITE);               
             }, 
-            Var {val} => println!("var"),
+            Value::Var {val} => {
+                println!(" var");
+                let n: String;
+                match val {
+                    Basic {name} => {
+                        println!(" basic");
+                        n = name.clone(); //TODO: ask
+
+                        let var = stack.get(&n).unwrap(); // undeclared variable error todoA
+                
+                        match var {
+                            Variable::Atomic {position} => {
+                            let mut status: u64 = *position;
+                            res.push(RST {pos: A}); // A = 0
+                            if *position > 0 {
+                                while status > 0 {
+                                    res.push(INC {pos: A});
+                                    status -= 1;
+                                    }
+                                } 
+                            }
+                        Variable::Array {position, value} => {
+                            println!("problemix"); // error todo
+                            }
+                        }
+                        res.push(LOAD {pos: A});
+                    },
+                    Array {name, size} => {
+                        println!(" array");
+                        n = name.clone();
+                    },
+                    VLA {name, size} => {
+                        println!(" vla");
+                        n = name.clone();
+                    },
+                }
+            },
         }
 
+        res.push(WRITE);               
         return res; 
     }
 }
