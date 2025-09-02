@@ -32,13 +32,6 @@ impl Compiler {
     }
 
     pub fn compile(mut self) -> Vec<Instruction> {
-        // firstly compile procedures i guess
-        // then compile main and insert procedures
-
-        // declarations may be None
-        // if let Some(command) = self.program.main.commands {
-        //
-        // }
 
         // main
         match self.program.main.declarations {
@@ -48,20 +41,13 @@ impl Compiler {
                         Declaration::Basic {name} => {
                             // rename basic to atomic later
                             print!(" basic ");
-                            self.stack
-                                .insert(name, Variable::Atomic {position: self.sp});
+                            self.stack.insert(name, Variable::Atomic {position: self.sp});
                             self.sp += 1;
                         }
                         Declaration::Array {name, num} => {
                             // rename num to size later
                             print!(" array ");
-                            self.stack.insert(
-                                name,
-                                Variable::Array {
-                                    position: self.sp,
-                                    value: num,
-                                },
-                            );
+                            self.stack.insert(name, Variable::Array {position: self.sp, value: num});
                             self.sp += num;
                         }
                     }
@@ -112,7 +98,7 @@ impl Compiler {
 
                 let var = stack.get(&n).unwrap(); // undeclared variable error todoA
 
-                res.extend(Self::set_reg_a(var));
+                res.extend(Self::handle_variable(var));
             }
             Array {name, size} => todo!(),
             VLA {name, size} => todo!(),
@@ -127,17 +113,11 @@ impl Compiler {
         return res;
     }
 
-    // different types od Identifier
-    fn command_read(
-        id: &Identifier,
-        initialized: &mut HashSet<String>,
-        stack: &HashMap<String, Variable>,
-    ) -> Vec<Instruction> {
+    fn command_read(id: &Identifier, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+
         let mut res: Vec<Instruction> = vec![];
         let mut n: String;
 
-        // three cases
-        // let id = match later maybe
         match id {
             Basic { name } => {
                 println!(" basic");
@@ -145,7 +125,7 @@ impl Compiler {
 
                 let var = stack.get(&n).unwrap(); // undeclared variable error todoA
 
-                res.extend(Self::set_reg_a(var));
+                res.extend(Self::handle_variable(var));
             }
             Array {name, size} => {
                 println!(" array");
@@ -158,8 +138,6 @@ impl Compiler {
         }
 
         initialized.insert(n); // put it at the end of a scope
-
-        // instrucja read czyta wartosc z zewsnatrz i podstawia pod zmienna
 
         // where is the variable stored?
 
@@ -201,7 +179,7 @@ impl Compiler {
 
                         let var = stack.get(&n).unwrap(); // undeclared variable error todoA
 
-                        res.extend(Self::set_reg_a(var));
+                        res.extend(Self::handle_variable(var));
 
                         res.push(LOAD {pos: A});
                     }
@@ -221,22 +199,32 @@ impl Compiler {
         return res;
     }
 
-    fn set_reg_a(var: &Variable) -> Vec<Instruction> {
+    /* helpers */
+
+    fn handle_variable(var: &Variable) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
 
         match var {
             Variable::Atomic {position} => {
-                let mut status: u64 = *position;
-                res.push(RST {pos: A}); // A = 0
-                if *position > 0 {
-                    while status > 0 {
-                        res.push(INC {pos: A});
-                        status -= 1;
-                    }
-                }
+                res.extend(Self::set_reg_a(*position));
             }
             Variable::Array {position, value} => {
                 println!("problemix"); // error todo
+            }
+        }
+
+        return res;
+    }
+
+    fn set_reg_a(position: u64) -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+        
+        let mut status: u64 = position;
+        res.push(RST {pos: A}); // A = 0
+        if position > 0 {
+            while status > 0 {
+                res.push(INC {pos: A});
+                status -= 1;
             }
         }
 
