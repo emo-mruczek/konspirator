@@ -145,11 +145,68 @@ impl Compiler {
                 res.extend(Self::handle_value(r, stack));
                 res.push(ADD {pos: C});
             },
-            Sub {l, r} => todo!(),
-            Mul {l, r} => todo!(),
+            Sub {l, r} => {
+                // obsluga ujemych???
+                Self::is_initialized(&l, initialized);
+                Self::is_initialized(&r, initialized);
+                
+                res.extend(Self::handle_value(l, stack));
+                res.push(PUT {pos: C});
+                res.extend(Self::handle_value(r, stack));
+                res.push(SUB {pos: C});
+            },
+            Mul {l, r} => {
+                Self::is_initialized(&l, initialized);
+                Self::is_initialized(&r, initialized);
+                
+                res.extend(Self::handle_value(l, stack));
+                res.push(PUT {pos: C});
+                res.extend(Self::handle_value(r, stack));
+                res.push(SUB {pos: C});
+
+            },
             Div {l, r} => todo!(),
             Mod {l, r} => todo!(),
         }
+
+        return res;
+    }
+
+    /* additional instructions */
+
+    fn construct_multiplication() -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+
+        res.push(PUT {pos: });
+        res.push(RST {pos: });
+        res.push(GET {pos: });
+        res.push(JZERO {pos: });
+        res.push(SHR {pos: });
+        res.push(SHL {pos: });
+        res.push(GET {pos: });
+        res.push(SUB {pos: });
+        res.push(JZERO {pos: });
+        res.push(GET {pos: });
+        res.push(ADD {pos: });
+        res.push(PUT {pos: });
+        res.push(SHL {pos: });
+        res.push(SHR {pos: });
+        res.push(GET {pos: });
+        res.push(PUT {pos: });
+        res.push(JUMP {pos: });
+        res.push(GET {pos: });
+
+        return res;
+    } 
+
+    fn construct_division() -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+
+        return res;
+    } 
+
+    fn construct_modulo() -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
 
         return res;
     }

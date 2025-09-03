@@ -37,7 +37,7 @@ fn main() -> io::Result<()> {
     match program {
         Ok(p) => {
             println!(" Successfully parsed\n");
-            let compiler: Compiler = Compiler::new(p);
+            let mut compiler: Compiler = Compiler::new(p);
             instructions = compiler.compile();
         },
         Err(_) => panic!("Something wrong!"), // TODO: for now

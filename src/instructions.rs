@@ -4,7 +4,7 @@ use std::fmt;
 use Instruction::*;
 use Register::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Register {
     A,
     B,
@@ -51,7 +51,7 @@ impl fmt::Display for Instruction {
     }
 }
 
-#[derive(Debug)] // in order to be able to print it
+#[derive(Debug, Clone)] // in order to be able to print it
 pub enum Instruction {
     READ,
     WRITE,
