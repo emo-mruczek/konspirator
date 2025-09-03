@@ -89,13 +89,13 @@ pub enum Instruction {
         pos: Register, 
     },
     JUMP {
-        pos: u64, 
+        pos: i64, 
     },
     JPOS {
-        pos: u64, 
+        pos: i64, 
     },
     JZERO {
-        pos: u64, 
+        pos: i64, 
     },
     STRK {
         pos: Register, 

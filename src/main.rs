@@ -37,23 +37,35 @@ fn main() -> io::Result<()> {
     match program {
         Ok(p) => {
             println!(" Successfully parsed\n");
-            let mut compiler: Compiler = Compiler::new(p);
+            let compiler: Compiler = Compiler::new(p);
             instructions = compiler.compile();
         },
-        Err(_) => panic!("Something wrong!"), // TODO: for now
+        Err(e) => panic!("Something wrong! {e:}"), // TODO: for now
     };
+
+    /* needed to recheck the instructions in order to set the jump positions */
 
     /* output */
 
     println!("\n Compiled code:\n");
 
-    for instruction in instructions.iter() {
+    let mut iter: i64 = 0;
+    for instruction in instructions.iter_mut() {
+        
+        match instruction {
+            READ | WRITE | HALT => {},
+            LOAD {pos} | STORE {pos} | ADD {pos} | SUB {pos} | GET {pos} | PUT {pos} | RST {pos} | INC {pos} | DEC {pos} | SHL {pos} | SHR {pos} | STRK {pos} | JUMPR {pos} => {},
+            JUMP {pos} | JPOS {pos} | JZERO {pos} => {
+                *pos = iter + *pos;
+            },
+        }
         println!("{}", instruction); 
+        iter += 1;
     }
 
     // https://stackoverflow.com/questions/63713887/how-to-write-string-to-file
     let mut output_code = File::create(out_name)?;
-    
+
     for instruction in instructions.iter() {
         write!(output_code, "{}\n", instruction)?;
     }

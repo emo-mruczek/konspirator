@@ -86,11 +86,11 @@ impl Compiler {
 
         res.extend(Self::get_variable(id, stack));
 
-        res.push(PUT {pos: B});
+        res.push(PUT {pos: G});
 
         res.extend(Self::handle_expression(expression, initialized, stack));
 
-        res.push(STORE {pos: B});
+        res.push(STORE {pos: G});
         
         initialized.insert(Self::get_name(id)); 
 
@@ -103,9 +103,9 @@ impl Compiler {
 
         res.extend(Self::get_variable(id, stack));
 
-        res.push(PUT {pos: B});
+        res.push(PUT {pos: H});
         res.push(READ);
-        res.push(STORE {pos: B});
+        res.push(STORE {pos: H});
 
         initialized.insert(Self::get_name(&id)); 
 
@@ -141,28 +141,30 @@ impl Compiler {
                 //TODO: perform addition in compile-time to reduce number of instructions
                 
                 res.extend(Self::handle_value(l, stack));
-                res.push(PUT {pos: C});
+                res.push(PUT {pos: B});
                 res.extend(Self::handle_value(r, stack));
-                res.push(ADD {pos: C});
+                res.push(ADD {pos: B});
             },
             Sub {l, r} => {
                 // obsluga ujemych???
                 Self::is_initialized(&l, initialized);
                 Self::is_initialized(&r, initialized);
                 
-                res.extend(Self::handle_value(l, stack));
-                res.push(PUT {pos: C});
                 res.extend(Self::handle_value(r, stack));
-                res.push(SUB {pos: C});
+                res.push(PUT {pos: B});
+                res.extend(Self::handle_value(l, stack));
+                res.push(SUB {pos: B});
+
             },
             Mul {l, r} => {
                 Self::is_initialized(&l, initialized);
                 Self::is_initialized(&r, initialized);
                 
                 res.extend(Self::handle_value(l, stack));
-                res.push(PUT {pos: C});
+                res.push(PUT {pos: B});
                 res.extend(Self::handle_value(r, stack));
-                res.push(SUB {pos: C});
+                res.push(PUT {pos: C});
+                res.extend(Self::construct_multiplication());
 
             },
             Div {l, r} => todo!(),
@@ -177,24 +179,24 @@ impl Compiler {
     fn construct_multiplication() -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
 
-        res.push(PUT {pos: });
-        res.push(RST {pos: });
-        res.push(GET {pos: });
-        res.push(JZERO {pos: });
-        res.push(SHR {pos: });
-        res.push(SHL {pos: });
-        res.push(GET {pos: });
-        res.push(SUB {pos: });
-        res.push(JZERO {pos: });
-        res.push(GET {pos: });
-        res.push(ADD {pos: });
-        res.push(PUT {pos: });
-        res.push(SHL {pos: });
-        res.push(SHR {pos: });
-        res.push(GET {pos: });
-        res.push(PUT {pos: });
-        res.push(JUMP {pos: });
-        res.push(GET {pos: });
+        res.push(PUT {pos: E});
+        res.push(RST {pos: D});
+        res.push(GET {pos: C});
+        res.push(JZERO {pos: 14});
+        res.push(SHR {pos: E});
+        res.push(SHL {pos: E});
+        res.push(GET {pos: C});
+        res.push(SUB {pos: E});
+        res.push(JZERO {pos: 4});
+        res.push(GET {pos: D});
+        res.push(ADD {pos: B});
+        res.push(PUT {pos: D});
+        res.push(SHL {pos: B});
+        res.push(SHR {pos: C});
+        res.push(GET {pos: C});
+        res.push(PUT {pos: E});
+        res.push(JUMP {pos: -14});
+        res.push(GET {pos: D});
 
         return res;
     } 
