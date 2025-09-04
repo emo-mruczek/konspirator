@@ -1,6 +1,6 @@
 /* compiler */
 
-use crate::ast::{Command::*, Identifier::*, Value::*, Expression::*, *};
+use crate::ast::{Command::*, Identifier::*, Expression::*, *};
 use crate::instructions::Instruction::{self, *};
 use crate::instructions::Register::*;
 use std::collections::{HashMap, HashSet};
@@ -10,7 +10,6 @@ pub enum Variable {
     Array {position: u64, value: u64},
 }
 
-// current instruction number can be obtained by checking the length od the instructions vector
 pub struct Compiler {
     program: ProgramAll,
     instructions: Vec<Instruction>,
@@ -40,11 +39,14 @@ impl Compiler {
                         Declaration::Basic {name} => {
                             // rename basic to atomic later
                             self.stack.insert(name, Variable::Atomic {position: self.sp});
+
+                            println!("SP: {}", self.sp);
                             self.sp += 1;
                         }
                         Declaration::Array {name, num} => {
                             // rename num to size later
                             self.stack.insert(name, Variable::Array {position: self.sp, value: num});
+                            println!("SP: {}", self.sp);
                             self.sp += num;
                         }
                     }
@@ -324,10 +326,13 @@ impl Compiler {
 
         match id {
             Basic {name} => {
-                let var = stack.get(name).unwrap(); // undeclared variable error todoA
-                res.extend(Self::handle_variable(var));
+                let var = stack.get(name).unwrap(); // undeclared variable error todo
+                res.extend(Self::handle_variable_atomic(var));
             }
             Array {name, size} => {
+                let var = stack.get(name).unwrap(); // undeclared variable error todo
+                res.extend(Self::handle_variable_array(var, *size));
+
             }
             VLA {name, size} => {
             }
@@ -336,7 +341,25 @@ impl Compiler {
         return res;
     }
 
-    fn handle_variable(var: &Variable) -> Vec<Instruction> {
+    fn handle_variable_array(var: &Variable, size: u64) -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+
+        match var {
+            Variable::Atomic {position} => {
+                println!("problemix!"); // error todo
+            },
+            Variable::Array {position, value} => { // todo: maybe change the names
+                if size >= *value {
+                   println!("problemix! out od bounds"); // error out of bounds exception 
+                }
+                res.extend(Self::set_reg_a(position + size));
+            },
+        }
+
+        return res;
+    }
+
+    fn handle_variable_atomic(var: &Variable) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
 
         match var {
@@ -350,6 +373,8 @@ impl Compiler {
 
         return res;
     }
+
+    // todo: some improvements with shl
 
     fn set_reg_a(position: u64) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];

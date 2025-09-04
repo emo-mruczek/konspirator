@@ -1,0 +1,15 @@
+# Binarna postać liczby 
+PROGRAM IS
+ a[4], c
+IN
+   a[0] := 2;
+   a[1] := 1;
+   c := 69;
+   a[2] := 3;
+   a[3] := 7;
+   WRITE a[0];
+   WRITE a[1];
+   WRITE a[2];
+   WRITE c;
+   WRITE a[3];
+END
