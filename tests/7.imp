@@ -1,0 +1,15 @@
+# Binarna postać liczby 
+PROGRAM IS
+a, b , d, j, q
+IN
+   b := 20 / 2;
+   d := 90 / b;
+   j := 9 / 3;
+   q := d / j;
+   WRITE b;
+   WRITE d;
+   WRITE j;
+   WRITE q;
+ #   a := 4 / 2;
+ #   WRITE a;
+END

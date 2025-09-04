@@ -49,18 +49,15 @@ fn main() -> io::Result<()> {
 
     println!("\n Compiled code:\n");
 
-    let mut iter: i64 = 0;
-    for instruction in instructions.iter_mut() {
+    for (iter, instruction) in instructions.iter_mut().enumerate() {
         
         match instruction {
-            READ | WRITE | HALT => {},
-            LOAD {pos} | STORE {pos} | ADD {pos} | SUB {pos} | GET {pos} | PUT {pos} | RST {pos} | INC {pos} | DEC {pos} | SHL {pos} | SHR {pos} | STRK {pos} | JUMPR {pos} => {},
             JUMP {pos} | JPOS {pos} | JZERO {pos} => {
-                *pos = iter + *pos;
+                *pos = (iter as i64) + *pos;
             },
+            _ => {},
         }
         println!("{}", instruction); 
-        iter += 1;
     }
 
     // https://stackoverflow.com/questions/63713887/how-to-write-string-to-file

@@ -167,8 +167,26 @@ impl Compiler {
                 res.extend(Self::construct_multiplication());
 
             },
-            Div {l, r} => todo!(),
-            Mod {l, r} => todo!(),
+            Div {l, r} => { //TODO: dzielenie przez zero
+                Self::is_initialized(l, initialized);
+                Self::is_initialized(r, initialized);
+
+                res.extend(Self::handle_value(l, stack));
+                res.push(PUT {pos: B});
+                res.extend(Self::handle_value(r, stack));
+                res.push(PUT {pos: C});
+                res.extend(Self::construct_division());
+            },
+            Mod {l, r} => {
+                Self::is_initialized(l, initialized);
+                Self::is_initialized(r, initialized);
+
+                res.extend(Self::handle_value(l, stack));
+                res.push(PUT {pos: B});
+                res.extend(Self::handle_value(r, stack));
+                res.push(PUT {pos: C});
+                res.extend(Self::construct_modulo());
+            },
         }
 
         return res;
@@ -203,6 +221,30 @@ impl Compiler {
 
     fn construct_division() -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
+
+        res.push(RST {pos: D});
+        res.push(JZERO {pos: 21});
+        res.push(GET {pos: C});
+        res.push(SUB {pos: B});
+        res.push(JPOS {pos: 18});
+        res.push(GET {pos: C});
+        res.push(PUT {pos: E});
+        res.push(RST {pos: F});
+        res.push(INC {pos: F});
+        res.push(GET {pos: E});
+        res.push(SUB {pos: B});
+        res.push(JPOS {pos: 10});
+        res.push(GET {pos: B});
+        res.push(SUB {pos: E});
+        res.push(PUT {pos: B});
+        res.push(GET {pos: D});
+        res.push(ADD {pos: F});
+        res.push(PUT {pos: D});
+        res.push(SHL {pos: E});
+        res.push(SHL {pos: F});
+        res.push(JUMP {pos: -11});
+        res.push(JUMP {pos: -19});
+        res.push(GET {pos: D});
 
         return res;
     } 
