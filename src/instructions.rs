@@ -42,9 +42,9 @@ impl fmt::Display for Instruction {
             DEC {pos} => write!(f, "{} {}", "DEC", pos),
             SHL {pos} => write!(f, "{} {}", "SHL", pos),
             SHR {pos} => write!(f, "{} {}", "SHR", pos),
-            JUMP {pos} => write!(f, "{} {}", "JUMP", pos),
-            JPOS {pos} => write!(f, "{} {}", "JPOS", pos),
-            JZERO {pos} => write!(f, "{} {}", "JZERO", pos),
+            JUMP {pos, adjust} => write!(f, "{} {}", "JUMP", pos),
+            JPOS {pos, adjust} => write!(f, "{} {}", "JPOS", pos),
+            JZERO {pos, adjust} => write!(f, "{} {}", "JZERO", pos),
             JUMPR {pos} => write!(f, "{} {}", "JUMPR", pos),
             STRK {pos} => write!(f, "{} {}", "STRK", pos),
         }
@@ -90,12 +90,15 @@ pub enum Instruction {
     },
     JUMP {
         pos: i64, 
+        adjust: bool,
     },
     JPOS {
-        pos: i64, 
+        pos: i64,
+        adjust: bool,
     },
     JZERO {
         pos: i64, 
+        adjust: bool,
     },
     STRK {
         pos: Register, 

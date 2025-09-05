@@ -52,8 +52,10 @@ fn main() -> io::Result<()> {
     for (iter, instruction) in instructions.iter_mut().enumerate() {
         
         match instruction {
-            JUMP {pos} | JPOS {pos} | JZERO {pos} => {
+            JUMP {pos, adjust} | JPOS {pos, adjust} | JZERO {pos, adjust} => {
+                if *adjust {
                 *pos = (iter as i64) + *pos;
+                }
             },
             _ => {},
         }
