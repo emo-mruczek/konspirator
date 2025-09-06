@@ -7,6 +7,7 @@ use crate::compiler::Compiler;
 use crate::ast::{Expression::*, *};
 use crate::helpers::Variable;
 
+/* todo: move there stuff from additional_commands, and this function into compiler.rs */
 
 impl Compiler {
     

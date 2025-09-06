@@ -64,12 +64,24 @@ impl Compiler {
         }
 
         match cond {
-            Condition::Equal {l, r} => res.extend(Self::handle_equal_if(l, r, stack, &block_instructions, &else_block_instructions)),
-            Condition::NotEqual {l, r} => todo!(),
-            Condition::Greater {l, r} => todo!(),
-            Condition::Less {l, r} => todo!(),
-            Condition::GreaterEqual {l, r} => todo!(),
-            Condition::LessEqual {l, r} => todo!(),
+            Condition::Equal {l, r} => {
+                res.extend(Self::handle_equal_if(l, r, stack, &block_instructions, &else_block_instructions));
+            },
+            Condition::NotEqual {l, r} => {
+                res.extend(Self::handle_notequal_if(l, r, stack, &block_instructions, &else_block_instructions));
+            },
+            Condition::Greater {l, r} => {
+                res.extend(Self::handle_greater_if(l, r, stack, &block_instructions, &else_block_instructions));
+            },
+            Condition::Less {l, r} => {
+                res.extend(Self::handle_less_if(l, r, stack, &block_instructions, &else_block_instructions));
+            },
+            Condition::GreaterEqual {l, r} => {
+                res.extend(Self::handle_greaterequal_if(l, r, stack, &block_instructions, &else_block_instructions));
+            },
+            Condition::LessEqual {l, r} => {
+                res.extend(Self::handle_lessequal_if(l, r, stack, &block_instructions, &else_block_instructions));
+            },
         }
         
         return res;
