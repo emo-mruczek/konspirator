@@ -1,0 +1,10 @@
+PROGRAM IS
+  a
+IN
+  IF 1 = 1 THEN
+   WRITE 1;
+  ELSE
+    WRITE 3;
+   ENDIF
+  WRITE 2;
+END

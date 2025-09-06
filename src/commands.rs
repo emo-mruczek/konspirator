@@ -1,0 +1,77 @@
+/* commands */
+
+use crate::instructions::Instruction::{self, *};
+use crate::instructions::Register::*;
+use std::collections::{HashMap, HashSet};
+use crate::compiler::Compiler;
+use crate::ast::*;
+use crate::helpers::Variable;
+
+impl Compiler {
+
+    
+    pub fn command_assign(id: &Identifier, expression: &Expression, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+
+        res.extend(Self::get_variable(id, stack));
+
+        res.push(PUT {pos: G});
+
+        res.extend(Self::handle_expression(expression, initialized, stack));
+
+        res.push(STORE {pos: G});
+        
+        initialized.insert(Self::get_name(id)); 
+
+        return res;
+    }
+
+    pub fn command_read(id: &Identifier, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+
+        let mut res: Vec<Instruction> = vec![];
+
+        res.extend(Self::get_variable(id, stack));
+
+        res.push(PUT {pos: H});
+        res.push(READ);
+        res.push(STORE {pos: H});
+
+        initialized.insert(Self::get_name(&id)); 
+
+        return res;
+    }
+
+    pub fn command_write(val: &Value, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+
+        res.extend(Self::handle_value(val, stack));
+
+        res.push(WRITE);
+        return res;
+    }
+
+    pub fn command_if(cond: &Condition, comm: &Vec<Command>, else_comm: &Option<Vec<Command>>, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+
+        let mut block_instructions: Vec<Instruction> = vec![];
+        let mut else_block_instructions: Vec<Instruction> = vec![];
+
+        block_instructions.extend(Self::handle_commands(comm, initialized, stack));
+
+        match else_comm {
+            Some(commands) => else_block_instructions.extend(Self::handle_commands(commands, initialized, stack)),
+            None => {},
+        }
+
+        match cond {
+            Condition::Equal {l, r} => res.extend(Self::handle_equal_if(l, r, stack, &block_instructions, &else_block_instructions)),
+            Condition::NotEqual {l, r} => todo!(),
+            Condition::Greater {l, r} => todo!(),
+            Condition::Less {l, r} => todo!(),
+            Condition::GreaterEqual {l, r} => todo!(),
+            Condition::LessEqual {l, r} => todo!(),
+        }
+        
+        return res;
+    }
+}

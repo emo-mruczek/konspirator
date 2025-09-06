@@ -3,6 +3,11 @@
 mod ast;
 mod instructions;
 mod compiler;
+mod helpers;
+mod additional_commands;
+mod expressions;
+mod commands;
+mod conditions_if;
 
 use lalrpop_util::lalrpop_mod;
 use std::{env, io::{self, Write}, fs::{self, File}, process::exit};
