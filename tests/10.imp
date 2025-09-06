@@ -1,7 +1,7 @@
 PROGRAM IS
-  a
 IN
-  IF 1 = 1 THEN
+  WRITE 2137;
+  IF 1 = 2 THEN
    WRITE 1;
   ELSE
     WRITE 3;

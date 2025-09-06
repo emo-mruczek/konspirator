@@ -65,22 +65,22 @@ impl Compiler {
 
         match cond {
             Condition::Equal {l, r} => {
-                res.extend(Self::handle_equal_if(l, r, stack, &block_instructions, &else_block_instructions));
+                res.extend(Self::handle_equal(l, r, stack, &block_instructions, &else_block_instructions));
             },
             Condition::NotEqual {l, r} => {
-                res.extend(Self::handle_notequal_if(l, r, stack, &block_instructions, &else_block_instructions));
+                res.extend(Self::handle_notequal(l, r, stack, &block_instructions, &else_block_instructions));
             },
             Condition::Greater {l, r} => {
-                res.extend(Self::handle_greater_if(l, r, stack, &block_instructions, &else_block_instructions));
+                res.extend(Self::handle_greater(l, r, stack, &block_instructions, &else_block_instructions));
             },
             Condition::Less {l, r} => {
-                res.extend(Self::handle_less_if(l, r, stack, &block_instructions, &else_block_instructions));
+                res.extend(Self::handle_less(l, r, stack, &block_instructions, &else_block_instructions));
             },
             Condition::GreaterEqual {l, r} => {
-                res.extend(Self::handle_greaterequal_if(l, r, stack, &block_instructions, &else_block_instructions));
+                res.extend(Self::handle_greaterequal(l, r, stack, &block_instructions, &else_block_instructions));
             },
             Condition::LessEqual {l, r} => {
-                res.extend(Self::handle_lessequal_if(l, r, stack, &block_instructions, &else_block_instructions));
+                res.extend(Self::handle_lessequal(l, r, stack, &block_instructions, &else_block_instructions));
             },
         }
         
