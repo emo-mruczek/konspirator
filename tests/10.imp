@@ -1,7 +1,7 @@
 PROGRAM IS
 IN
   WRITE 2137;
-  IF 3 >= 2 THEN
+  IF 2 != 2 THEN
    WRITE 1;
   ELSE
     WRITE 3;
