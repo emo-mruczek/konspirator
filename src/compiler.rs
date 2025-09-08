@@ -80,7 +80,12 @@ impl Compiler {
                     ret.extend(res);
  
                 },
-                Repeat {comm, cond} => println!("Repeat"),
+                Repeat {comm, cond} => {
+                    let res = Self::command_repeat(&cond, &comm, initialized, &stack);
+
+                    ret.extend(res);
+ 
+                },
                 Call {call} => println!("Call"),
                 Read {name} => {
                     let res = Self::command_read(&name, initialized, &stack);
