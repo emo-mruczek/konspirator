@@ -114,6 +114,9 @@ impl Compiler {
             },
         }
 
+        res.extend(block_instructions);
+        res.push(JUMP {pos: -(res.len() as i64), adjust: true});
+
         return res;
     }
 }
