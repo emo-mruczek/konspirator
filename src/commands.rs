@@ -65,25 +65,55 @@ impl Compiler {
 
         match cond {
             Condition::Equal {l, r} => {
-                res.extend(Self::handle_equal(l, r, stack, &block_instructions, &Some(else_block_instructions)));
+                res.extend(Self::for_handle_equal(l, r, stack, &block_instructions, &else_block_instructions));
             },
             Condition::NotEqual {l, r} => {
-                res.extend(Self::handle_notequal(l, r, stack, &block_instructions, &Some(else_block_instructions)));
+                res.extend(Self::for_handle_notequal(l, r, stack, &block_instructions, &else_block_instructions));
             },
             Condition::Greater {l, r} => {
-                res.extend(Self::handle_greater(l, r, stack, &block_instructions, &Some(else_block_instructions)));
+                res.extend(Self::for_handle_greater(l, r, stack, &block_instructions, &else_block_instructions));
             },
             Condition::Less {l, r} => {
-                res.extend(Self::handle_less(l, r, stack, &block_instructions, &Some(else_block_instructions)));
+                res.extend(Self::for_handle_less(l, r, stack, &block_instructions, &else_block_instructions));
             },
             Condition::GreaterEqual {l, r} => {
-                res.extend(Self::handle_greaterequal(l, r, stack, &block_instructions, &Some(else_block_instructions)));
+                res.extend(Self::for_handle_greaterequal(l, r, stack, &block_instructions, &else_block_instructions));
             },
             Condition::LessEqual {l, r} => {
-                res.extend(Self::handle_lessequal(l, r, stack, &block_instructions, &Some(else_block_instructions)));
+                res.extend(Self::for_handle_lessequal(l, r, stack, &block_instructions, &else_block_instructions));
             },
         }
         
+        return res;
+    }
+    
+    pub fn command_while(cond: &Condition, comm: &Vec<Command>, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+
+        let mut block_instructions: Vec<Instruction> = vec![];
+        block_instructions.extend(Self::handle_commands(comm, initialized, stack));
+
+        match cond {
+            Condition::Equal {l, r} => {
+                res.extend(Self::while_handle_equal(l, r, stack, &block_instructions));
+            },
+            Condition::NotEqual {l, r} => {
+                res.extend(Self::while_handle_notequal(l, r, stack, &block_instructions));
+            },
+            Condition::Greater {l, r} => {
+                res.extend(Self::while_handle_greater(l, r, stack, &block_instructions));
+            },
+            Condition::Less {l, r} => {
+                res.extend(Self::while_handle_less(l, r, stack, &block_instructions));
+            },
+            Condition::GreaterEqual {l, r} => {
+                res.extend(Self::while_handle_greaterequal(l, r, stack, &block_instructions));
+            },
+            Condition::LessEqual {l, r} => {
+                res.extend(Self::while_handle_lessequal(l, r, stack, &block_instructions));
+            },
+        }
+
         return res;
     }
 }
