@@ -74,7 +74,12 @@ impl Compiler {
 
                     ret.extend(res);
                 },
-                While {cond, comm} => println!("While"),
+                While {cond, comm} => {
+                    let res = Self::command_while(&cond, &comm, initialized, &stack);
+
+                    ret.extend(res);
+ 
+                },
                 Repeat {comm, cond} => println!("Repeat"),
                 Call {call} => println!("Call"),
                 Read {name} => {

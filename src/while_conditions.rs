@@ -58,7 +58,6 @@ impl Compiler {
         res.extend(Self::handle_value(l, stack));
         res.push(SUB {pos: B});
         res.push(JPOS {pos: 2, adjust: true});
-        res.push(JUMP {pos: 2, adjust: true});
         res.push(JUMP {pos: (block_instructions.len() as i64) + 2, adjust: true});
 
         return res;
