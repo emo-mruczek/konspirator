@@ -20,6 +20,7 @@ impl Compiler {
 
         let len = res.len();
         res.push(JPOS {pos: -((block_instructions.len() + len) as i64), adjust: true});
+        println!("{}", -((block_instructions.len() + len) as i64));
         
         res.push(GET {pos: B});
         res.push(SUB {pos: C});

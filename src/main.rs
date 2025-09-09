@@ -56,12 +56,17 @@ fn main() -> io::Result<()> {
 
     println!("\n Compiled code:\n");
 
+    let instructions_len: i64 = instructions.len() as i64;
+
     for (iter, instruction) in instructions.iter_mut().enumerate() {
         
         match instruction {
             JUMP {pos, adjust} | JPOS {pos, adjust} | JZERO {pos, adjust} => {
                 if *adjust {
-                *pos = (iter as i64) + *pos;
+                    *pos = (iter as i64) + *pos;
+                    while *pos < 0 {
+                        *pos =  (iter as i64) + *pos;
+                    }
                 }
             },
             _ => {},

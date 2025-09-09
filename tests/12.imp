@@ -1,0 +1,10 @@
+PROGRAM IS
+n
+IN
+  n := 3;
+  REPEAT
+    WRITE n;
+    n := n - 1;
+  UNTIL n = 0;
+
+END

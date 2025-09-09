@@ -134,8 +134,13 @@ impl Compiler {
         res.push(RST {pos: A}); // A = 0
         if position > 0 {
             while status > 0 {
-                res.push(INC {pos: A});
-                status -= 1;
+                if status % 2 == 1 {
+                    res.push(INC {pos: A});
+                    status -= 1;
+                } else {
+                    res.push(SHL {pos: A});
+                    status /= 2;
+                }
             }
         }
 
