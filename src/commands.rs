@@ -1,5 +1,7 @@
 /* commands */
 
+/* somethings wrong, idk why */
+
 use crate::instructions::Instruction::{self, *};
 use crate::instructions::Register::*;
 use std::collections::{HashMap, HashSet};

@@ -56,8 +56,6 @@ fn main() -> io::Result<()> {
 
     println!("\n Compiled code:\n");
 
-    let instructions_len: i64 = instructions.len() as i64;
-
     for (iter, instruction) in instructions.iter_mut().enumerate() {
         
         match instruction {

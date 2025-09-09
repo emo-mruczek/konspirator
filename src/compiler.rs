@@ -78,7 +78,6 @@ impl Compiler {
                     let res = Self::command_while(&cond, &comm, initialized, &stack);
 
                     ret.extend(res);
- 
                 },
                 Repeat {comm, cond} => {
                     let res = Self::command_repeat(&cond, &comm, initialized, &stack);
