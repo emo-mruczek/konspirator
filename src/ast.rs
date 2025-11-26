@@ -1,22 +1,39 @@
-// https://lalrpop.github.io/lalrpop/tutorial/005_building_asts.html
+
+// TODO:
 
 pub type Num = u64;
 
-pub type PID = String;
+pub type ID = String;
+
+pub enum PID {
+    Procedure {
+        name: ID,
+    },
+    Variable {
+        name: ID,
+    },
+}
+
+// identifier -> pidentifier 
+// identifier -> pidentifier[pidentifier]
+// identifier -> pidentifier[num]
 
 pub enum Identifier {
-    Basic {
+    Var {
         name: PID,
+    },
+    Array_Var {
+        name: PID,
+        size: PID,
     },
     Array {
         name: PID,
         size: Num,
     },
-    VLA {
-        name: PID,
-        size: PID,
-    },
 }
+
+// value -> num 
+// value -> identifier 
 
 pub enum Value {
     Num {
@@ -26,6 +43,14 @@ pub enum Value {
         val: Identifier, 
     },
 }
+
+// condition -> value = value
+// condition -> value != value 
+// condition -> value * value 
+// condition -> value > value 
+// condition -> value < value 
+// condition -> value >= value 
+// condition -> value <= value 
 
 pub enum Condition {
     Equal {
@@ -54,6 +79,13 @@ pub enum Condition {
     },
 }
 
+// expression -> value 
+// expression -> value + value 
+// expression -> value - value 
+// expression -> value * value 
+// expression -> value / value 
+// expression -> value % value 
+
 pub enum Expression {
     Val {
         val: Value,
@@ -80,40 +112,78 @@ pub enum Expression {
     },
 }
 
+
+// args -> args, pidentifier
+// args -> pidentifier
+
 pub type Args = Vec<PID>;
 
-pub enum ArgDecl {
-    Basic {
+// TODO:
+// type -> T | I | O | 
+
+pub enum Type {
+    Array {
         name: PID,
     },
-    Tab {
+    Const {
+        name: PID,
+    },
+    Undefined {
         name: PID,
     },
 }
 
-pub type ArgsDecl = Vec<ArgDecl>;
+// TODO:
+// args_decl -> args_decl, type pidentifier
+// args_decl -> type pidentifier
+
+
+pub type ArgsDecl = Vec<Type>;
+
+// declarations -> declarations, pidentifier
+// declarations -> declarations, pidentifier[num:num]
+// declarations -> pidentifier
+// declarations -> pidentifier[num:num]
 
 pub enum Declaration {
     Basic {
         name: PID,
     },
+    // TODO:
     Array {
         name: PID,
-        num: Num,
+        num_lhs: Num,
+        num_rhs: Num,
     },  
 }
 
 pub type Declarations = Vec<Declaration>;
+
+
+// proc_call -> pididentifier ( args )
 
 pub struct ProcCall {
     pub name: PID,
     pub args: Args,
 }
 
+// proc_head -> pididentifier ( args_decl )
+
 pub struct ProcHead {
     pub name: PID,
     pub args_decl: ArgsDecl,
 }
+
+// command -> identifier := expression;
+// command -> IF condition THEN commands ELSE commands ENDIF
+// command -> IF condition THEN commands ENDIF
+// command -> WHILE condition DO commands ENDWHILE
+// command -> REPEAT commands UNTIL condition;
+// command -> FOR pidentifier FROM value TO value DO commands ENDFOR
+// command -> FOR pidentifier FROM value DOWNTO value DO commands ENDFOR
+// command -> proc_call;
+// command -> READ identifier;
+// command -> WRITE value;
 
 pub enum Command {
     Assign {
@@ -133,6 +203,14 @@ pub enum Command {
         comm: Commands,
         cond: Condition,
     },
+    // TODO:
+    For {
+        pid: PID,
+        val_lhs: Value,
+        val_rhs: Value,
+        comm: Commands,
+        is_downto: Bool,
+    },
     Call {
         call: ProcCall,
     },
@@ -144,13 +222,22 @@ pub enum Command {
     },
 }
 
+// commands -> commands command 
+// commands -> command 
+
 pub type Commands = Vec<Command>;
 
-// they dont have be any declarations
+// main -> PROGRAM IS declarations IN commands END
+// main -> PROGRAM IS IN commands END
+
 pub struct Main {
     pub declarations: Option<Declarations>,
     pub commands: Commands,
 }
+
+// procedures -> procedures PROCEDURE proc_head IS declarations IN commands END
+// procedures -> procedures PROCEDURE proc_head IS IN commands END
+// <empty>
 
 pub struct Procedure { 
     pub proc_head: ProcHead,
@@ -160,8 +247,11 @@ pub struct Procedure {
 
 pub type Procedures = Vec<Procedure>;
 
-// https://doc.rust-lang.org/std/option/ cuz can or cannot be (Some, None)
+// program_all -> procedures main
+
 pub struct ProgramAll {
     pub procedures: Option<Procedures>,
     pub main: Main,
 }
+
+
