@@ -3,16 +3,8 @@
 
 pub type Num = u64;
 
-pub type ID = String;
+pub type PID = String;
 
-pub enum PID {
-    Procedure {
-        name: ID,
-    },
-    Variable {
-        name: ID,
-    },
-}
 
 // identifier -> pidentifier 
 // identifier -> pidentifier[pidentifier]

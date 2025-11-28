@@ -9,18 +9,10 @@ NUM: Num = {
   <s: r"[0-9]+"> => u64::from_str(s).unwrap(),
 };
 
-ID: ID = {
+PID: PID = {
   <s: r"[_a-z]+"> => s.to_string(),
 };
 
-// TODO is it working?
-
-PID: PID = {
-  <i: ID> => PID::Procedure{name: i},
-  <i: ID> => PID::Variable{name: i},
-};
-
-// END TODO
 
 IDENTIFIER: Identifier = {
   <p: PID> => Identifier::Basic{name: p},
