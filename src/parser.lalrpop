@@ -1,0 +1,238 @@
+// https://lalrpop.github.io/lalrpop/tutorial/002_paren_numbers.html
+
+use std::str::FromStr;
+use crate::ast::*;
+
+grammar;
+
+NUM: Num = {
+  <s: r"[0-9]+"> => u64::from_str(s).unwrap(),
+};
+
+ID: ID = {
+  <s: r"[_a-z]+"> => s.to_string(),
+};
+
+// TODO is it working?
+
+PID: PID = {
+  <i: ID> => PID::Procedure{name: i},
+  <i: ID> => PID::Variable{name: i},
+};
+
+// END TODO
+
+IDENTIFIER: Identifier = {
+  <p: PID> => Identifier::Basic{name: p},
+  <pl: PID> "[" <pr: PID> "]" => Identifier::Array_Var{name: pl, size: pr},
+  <p: PID> "[" <n: NUM> "]" => Identifier::Array{name: p, size: n},
+};
+
+VALUE: Value = {
+  <n: NUM> => Value::Num{val: n},
+  <i: IDENTIFIER> => Value::Var{val: i},
+};
+
+CONDITION: Condition = {
+  <lv: VALUE> "=" <rv: VALUE> => Condition::Equal{l: lv,r: rv},
+  <lv: VALUE> "!=" <rv: VALUE> => Condition::NotEqual{l: lv,r: rv},
+  <lv: VALUE> ">" <rv: VALUE> => Condition::Greater{l: lv,r: rv},
+  <lv: VALUE> "<" <rv: VALUE> => Condition::Less{l: lv, r: rv},
+  <lv: VALUE> ">=" <rv: VALUE> => Condition::GreaterEqual{ l: lv,r: rv},
+  <lv: VALUE> "<=" <rv: VALUE> => Condition::LessEqual{l: lv,r: rv},
+};
+
+EXPRESSION: Expression = {
+  <lv: VALUE> => Expression::Val {val: lv}, 
+  <lv: VALUE> "+" <rv: VALUE> => Expression::Add {l: lv,r: rv}, 
+  <lv: VALUE> "-" <rv: VALUE> => Expression::Sub {l: lv,r: rv}, 
+  <lv: VALUE> "*" <rv: VALUE> => Expression::Mul {l: lv,r: rv}, 
+  <lv: VALUE> "/" <rv: VALUE> => Expression::Div {l: lv,r: rv}, 
+  <lv: VALUE> "%" <rv: VALUE> => Expression::Mod {l: lv,r: rv}, 
+};
+
+
+// https://lalrpop.github.io/lalrpop/tutorial/006_macros.html
+ARGS: Args = {
+  <mut v:(<PID> ",")*> <e: PID?> => match e {
+    None => v,
+    Some(e) => {
+      v.push(e);
+      return v;
+    }
+  },
+};
+
+// TODO
+
+ARGSDECL: ArgsDecl = {
+  <mut v: ARGSDECL> "," <p: PID> => {
+    v.push(ArgDecl::Basic{name: p});
+    return v;
+  },
+  <mut v: ARGSDECL> "," "T" <p: PID> => {
+    v.push(ArgDecl::Tab{name: p});
+    return v;
+  },
+  <p: PID> => vec![ArgDecl::Basic{name: p}],
+  "T" <p: PID> => vec![ArgDecl::Tab{name: p}],
+};
+
+TYPE: Type = {
+  "T" => 
+}
+
+ARGSDECL: ArgsDecl = {
+  
+}
+
+// END TODO
+
+// TODO is it working?
+
+DECLARATIONS: Declarations = {
+  <mut v:DECLARATIONS> "," <p: PID> => {
+    v.push(Declaration::Basic{name: p});
+    return v;
+  },
+  <mut v:DECLARATIONS> "," <p: PID> "[" <lhs: NUM> ":" <rhs:NUM> "]" => {
+    v.push(Declaration::Array{name: p, num_lhs: lhs, num_rhs: rhs});
+    return v;
+  },
+  <p: PID> => vec![Declaration::Basic{name: p}],
+  <p: PID> "[" <lhs: NUM> ":" <rhs: NUM> "]" => vec![Declaration::Array{name: p, num_lhs: lhs, num_rhs: rhs}],
+};
+
+// END TODO
+
+PROCCALL: ProcCall = {
+  <p: PID> "(" <a: ARGS> ")" => ProcCall{name: p, args: a},
+};
+
+PROCHEAD: ProcHead = {
+  <p: PID> "(" <a: ARGSDECL> ")" => ProcHead{name: p, args_decl: a},
+};
+
+// TODO: is it working?
+
+COMMAND: Command = {
+  <i: IDENTIFIER> ":=" <e: EXPRESSION> ";" => Command::Assign{name: i, expr: e},
+  "IF" <c: CONDITION> "THEN" <coml: COMMANDS> "ELSE" <comr: COMMANDS> "ENDIF" => Command::If{cond: c, comm: coml, else_comm: Some(comr)},
+  "IF" <c: CONDITION> "THEN" <com: COMMANDS> "ENDIF" => Command::If{cond: c, comm: com, else_comm: None},
+  "WHILE" <c: CONDITION> "DO" <com: COMMANDS> "ENDWHILE" => Command::While{cond: c, comm: com},
+  "REPEAT" <com: COMMANDS> "UNTIL" <c: CONDITION> ";" => Command::Repeat{comm: com, cond: c},
+  "FOR" <p: PID> "FROM" <lhs: VALUE> "TO" <rhs: VALUE> "DO" <com: COMMANDS> "ENDFOR" => Command:For{pid: p, val_lhs: lhs, val_rhs: rhs, comm: com, is_downto: False},
+  "FOR" <p: PID> "FROM" <lhs: VALUE> "DOWNTO" <rhs: VALUE> "DO" <com: COMMANDS> "ENDFOR" => Command:For{pid: p, val_lhs: lhs, val_rhs: rhs, comm: com, is_downto: True},
+  <p: PROCCALL> ";" => Command::Call{call: p},
+  "READ" <i: IDENTIFIER> ";" => Command::Read{name: i},
+  "WRITE" <v: VALUE> ";" => Command::Write{val: v}, 
+};
+
+// END TODO
+
+COMMANDS: Commands = {
+  <mut v: COMMANDS> <c: COMMAND> => {
+    v.push(c);
+    return v;
+  },
+  <c: COMMAND> => vec![c],
+};
+
+// TODO Main
+
+MAIN: Main = {
+  "PROGRAM" "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => {
+    let mut decls = vec![];
+    let mut cmds = vec![];
+
+    for decl in d {
+      match decl {
+        Declaration::Basic {name} => decls.push(Declaration::Basic {name: format!("{name}@main")}),
+        Declaration::Array {name, num} => decls.push(Declaration::Array {name: format!("{name}@main"), num: num}),
+      }
+    }
+
+    for cmd in c {
+      match cmd {
+
+      }
+    }
+
+    Main{
+      declarations: decls,
+      commands: cmds,
+    } 
+  },
+};
+
+// END TODO
+
+PROCEDURES: Procedures = {
+  <mut p: PROCEDURES> "PROCEDURE" <pc: PROCHEAD> "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => {
+    p.push(Procedure{proc_head: pc, declarations: d, commands: c});
+    return p;
+  },
+  "PROCEDURE" <pc: PROCHEAD> "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => vec![Procedure{proc_head: pc, declarations: d, commands: c}],
+};
+
+pub PROGRAMALL: ProgramAll = {
+  <p: PROCEDURES?> <m: MAIN> => ProgramAll{ procedures: p, main: m},
+};
+
+// TODO match
+
+match {
+    "+",
+    "-",
+    "*",
+    "/",
+    "%",
+    "=",
+    "!=",
+    ">",
+    "<",
+    ">=",
+    "<=",
+    ",",
+    "T",
+    ":",
+    "I",
+    "O"
+    r"[0-9]+",
+    r"[_a-z]+",
+    "[",
+    "]",
+    "(",
+    ")",
+    ":=",
+    "IF",
+    "THEN",
+    "ELSE",
+    "ENDIF",
+    "WHILE",
+    "DO",
+    "ENDWHILE",
+    "REPEAT",
+    "UNTIL",
+    ";",
+    "FOR",
+    "FROM",
+    "TO",
+    "DOWNTO",
+    "DO",
+    "ENDFOR",
+    "READ",
+    "WRITE",
+    "PROGRAM",
+    "IS",
+    "IN",
+    "END",
+    "PROCEDURE",
+    "\n" => {}, // prob unnecessary
+    r"\s*" => {}, // whitespaces
+    r"#[^\n\r]*[\n\r]*" => {}, // comments
+}
+
+// END TODO
+
+

@@ -1,7 +1,0 @@
-# Binarna postać liczby 
-PROGRAM IS
-  n
-IN
-   READ n;
-   WRITE n;
-END
