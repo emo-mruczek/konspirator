@@ -15,7 +15,7 @@ PID: PID = {
 
 
 IDENTIFIER: Identifier = {
-  <p: PID> => Identifier::Basic{name: p},
+  <p: PID> => Identifier::Var{name: p},
   <pl: PID> "[" <pr: PID> "]" => Identifier::Array_Var{name: pl, size: pr},
   <p: PID> "[" <n: NUM> "]" => Identifier::Array{name: p, size: n},
 };
@@ -55,32 +55,25 @@ ARGS: Args = {
   },
 };
 
+ARGSDECL: ArgsDecl = {
+ <mut v: ARGSDECL> "," "T" <p: PID> => {
+    v.push(Type::Array{name: p});
+    return v;
+ },
+ <mut v: ARGSDECL> "," "I" <p: PID> => {
+    v.push(Type::Const{name: p});
+    return v;
+ },
+ <mut v: ARGSDECL> "," "O" <p: PID> => {
+    v.push(Type::Undefined{name: p});
+    return v;
+ },
+ "T" <p: PID> => vec![Type::Array{name: p}],
+ "I" <p: PID> => vec![Type::Const{name: p}];
+ "O" <p: PID> => vec![Type::Undefined{name: p}],
+}
+
 // TODO
-
-ARGSDECL: ArgsDecl = {
-  <mut v: ARGSDECL> "," <p: PID> => {
-    v.push(ArgDecl::Basic{name: p});
-    return v;
-  },
-  <mut v: ARGSDECL> "," "T" <p: PID> => {
-    v.push(ArgDecl::Tab{name: p});
-    return v;
-  },
-  <p: PID> => vec![ArgDecl::Basic{name: p}],
-  "T" <p: PID> => vec![ArgDecl::Tab{name: p}],
-};
-
-TYPE: Type = {
-  "T" => 
-}
-
-ARGSDECL: ArgsDecl = {
-  
-}
-
-// END TODO
-
-// TODO is it working?
 
 DECLARATIONS: Declarations = {
   <mut v:DECLARATIONS> "," <p: PID> => {
@@ -105,7 +98,6 @@ PROCHEAD: ProcHead = {
   <p: PID> "(" <a: ARGSDECL> ")" => ProcHead{name: p, args_decl: a},
 };
 
-// TODO: is it working?
 
 COMMAND: Command = {
   <i: IDENTIFIER> ":=" <e: EXPRESSION> ";" => Command::Assign{name: i, expr: e},
@@ -113,14 +105,13 @@ COMMAND: Command = {
   "IF" <c: CONDITION> "THEN" <com: COMMANDS> "ENDIF" => Command::If{cond: c, comm: com, else_comm: None},
   "WHILE" <c: CONDITION> "DO" <com: COMMANDS> "ENDWHILE" => Command::While{cond: c, comm: com},
   "REPEAT" <com: COMMANDS> "UNTIL" <c: CONDITION> ";" => Command::Repeat{comm: com, cond: c},
-  "FOR" <p: PID> "FROM" <lhs: VALUE> "TO" <rhs: VALUE> "DO" <com: COMMANDS> "ENDFOR" => Command:For{pid: p, val_lhs: lhs, val_rhs: rhs, comm: com, is_downto: False},
-  "FOR" <p: PID> "FROM" <lhs: VALUE> "DOWNTO" <rhs: VALUE> "DO" <com: COMMANDS> "ENDFOR" => Command:For{pid: p, val_lhs: lhs, val_rhs: rhs, comm: com, is_downto: True},
+  "FOR" <p: PID> "FROM" <lhs: VALUE> "TO" <rhs: VALUE> "DO" <com: COMMANDS> "ENDFOR" => Command:For{pid: p, val_lhs: lhs, val_rhs: rhs, comm: com, is_downto: false},
+  "FOR" <p: PID> "FROM" <lhs: VALUE> "DOWNTO" <rhs: VALUE> "DO" <com: COMMANDS> "ENDFOR" => Command:For{pid: p, val_lhs: lhs, val_rhs: rhs, comm: com, is_downto: true},
   <p: PROCCALL> ";" => Command::Call{call: p},
   "READ" <i: IDENTIFIER> ";" => Command::Read{name: i},
   "WRITE" <v: VALUE> ";" => Command::Write{val: v}, 
 };
 
-// END TODO
 
 COMMANDS: Commands = {
   <mut v: COMMANDS> <c: COMMAND> => {
@@ -133,28 +124,7 @@ COMMANDS: Commands = {
 // TODO Main
 
 MAIN: Main = {
-  "PROGRAM" "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => {
-    let mut decls = vec![];
-    let mut cmds = vec![];
-
-    for decl in d {
-      match decl {
-        Declaration::Basic {name} => decls.push(Declaration::Basic {name: format!("{name}@main")}),
-        Declaration::Array {name, num} => decls.push(Declaration::Array {name: format!("{name}@main"), num: num}),
-      }
-    }
-
-    for cmd in c {
-      match cmd {
-
-      }
-    }
-
-    Main{
-      declarations: decls,
-      commands: cmds,
-    } 
-  },
+  "PROGRAM" "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => Main{declarations: d, commands: ca},
 };
 
 // END TODO
