@@ -5,6 +5,7 @@ use crate::instructions::Register::*;
 use std::collections::{HashMap, HashSet};
 use crate::compiler::Compiler;
 use crate::ast::*;
+use crate::helpers::*;
 
 impl Compiler {
 
@@ -41,28 +42,4 @@ impl Compiler {
         return res;
     }
 
-    pub fn set_reg_a(position: u64) -> Vec<Instruction> {
-        let mut res: Vec<Instruction> = vec![];
-        
-        let mut status: u64 = position;
-
-        res.push(RST {pos: A}); // A = 0
-
-        if position > 0 {
-            while status > 0 {
-                // if status % 2 == 1 {
-                    res.push(INC {pos: A});
-                    status -= 1;
-                // } else {
-                //     res.push(SHL {pos: A});
-                //     status /= 2;
-                // }
-            }
-        }
-
-        return res;
-    }
-
-
-
-}
+   }

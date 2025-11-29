@@ -3,11 +3,7 @@
 use crate::ast::{Command::*, *};
 use crate::instructions::Instruction::{self, *};
 use std::collections::{HashMap, HashSet};
-
-pub enum Variable {
-    Atomic {position: u64},
-    Array {position: u64, lhs: u64, rhs: u64},
-}
+use crate::helpers::*;
 
 pub struct Compiler {
     program: ProgramAll,
