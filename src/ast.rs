@@ -17,11 +17,11 @@ pub enum Identifier {
     },
     Array_Var {
         name: PID,
-        size: PID,
+        var: PID,
     },
     Array {
         name: PID,
-        size: Num,
+        var: Num,
     },
 }
 

@@ -58,7 +58,6 @@ impl Compiler {
 
         // compiling the main function
 
-
        self.instructions.extend(Self::handle_commands(&self.program.main.commands, &mut self.initialized, &self.stack));
 
         self.instructions.push(HALT);
@@ -106,7 +105,7 @@ impl Compiler {
                 }
                 Write {val} => {
                     println!("  Write");
-                    let res = Self::command_write(val);
+                    let res = Self::command_write(val, stack);
                     ret.extend(res);
                 }
             }

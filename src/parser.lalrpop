@@ -16,8 +16,8 @@ PID: PID = {
 
 IDENTIFIER: Identifier = {
   <p: PID> => Identifier::Var{name: p},
-  <pl: PID> "[" <pr: PID> "]" => Identifier::Array_Var{name: pl, size: pr},
-  <p: PID> "[" <n: NUM> "]" => Identifier::Array{name: p, size: n},
+  <pl: PID> "[" <pr: PID> "]" => Identifier::Array_Var{name: pl, var: pr},
+  <p: PID> "[" <n: NUM> "]" => Identifier::Array{name: p, var: n},
 };
 
 VALUE: Value = {
