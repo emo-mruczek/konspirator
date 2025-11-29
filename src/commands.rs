@@ -46,12 +46,12 @@ impl Compiler {
 
         match id {
             Var {name} => {
-                let var = stack.get(name).unwrap(); // undeclared variable error todo
-                res.extend(Self::handle_variable_atomic(var));
+                let variable = stack.get(name).unwrap(); // undeclared variable error todo
+                res.extend(Self::handle_variable_atomic(variable));
             }
-            Array {name, var} => {
-                let var = stack.get(name).unwrap(); // undeclared variable error todo
-                //res.extend(Self::handle_variable_array(var, *size));
+            Array {name, var} => { // var is a num in this case
+                let variable = stack.get(name).unwrap(); // undeclared variable error todo
+                res.extend(Self::handle_variable_array(variable, *var));
 
             }
             Array_Var {name, var} => {
@@ -82,6 +82,37 @@ impl Compiler {
         return res;
     } 
 
+    // array but variable-indexed
+    pub fn handle_variable_array_variable(var: &Variable, value: u64) -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+
+
+
+
+        return res;
+    }
+
+    pub fn handle_variable_array(var: &Variable, value: u64) -> Vec<Instruction> { // array but
+        // num-indexed
+        let mut res: Vec<Instruction> = vec![];
+
+        match var {
+            Variable::Atomic {position} => {
+                println!("problemix!"); // error todo
+            },
+            Variable::Array {position, lhs, rhs} => {
+                // TODO::
+                if value >= *rhs || value < *lhs {
+                   println!("problemix! out od bounds"); // error out of bounds exception 
+                }
+                let offset: u64 = value - lhs; 
+                res.extend(Self::set_reg_a(position + offset));
+            },
+        }
+
+        return res;
+    }
+    
     pub fn handle_variable_atomic(var: &Variable) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
 
