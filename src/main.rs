@@ -40,13 +40,13 @@ fn main() -> io::Result<()> {
 
     // whole as(s)t dump
     println!(" Successfully parsed\n");
-    println!("{:#?}", program); 
+    println!("{:#?}\n", program); 
 
     let mut instructions: Vec<Instruction> = vec![];
 
     match program {
         Ok(p) => { //_ for now, in order to not move the program
-            let compiler: Compiler::new(p);
+            let compiler: Compiler = Compiler::new(p);
             instructions = compiler.compile();
         },
         Err(e) => panic!("Something's wrong! {e:}"), // TODO: for now

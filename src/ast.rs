@@ -143,7 +143,7 @@ pub type ArgsDecl = Vec<ArgDecl>;
 
 #[derive(Debug)]
 pub enum Declaration {
-    Basic {
+    Atomic {
         name: PID,
     },
     // TODO:

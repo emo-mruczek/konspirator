@@ -77,14 +77,14 @@ ARGSDECL: ArgsDecl = {
 
 DECLARATIONS: Declarations = {
   <mut v:DECLARATIONS> "," <p: PID> => {
-    v.push(Declaration::Basic{name: p});
+    v.push(Declaration::Atomic{name: p});
     return v;
   },
   <mut v:DECLARATIONS> "," <p: PID> "[" <lhs: NUM> ":" <rhs:NUM> "]" => {
     v.push(Declaration::Array{name: p, num_lhs: lhs, num_rhs: rhs});
     return v;
   },
-  <p: PID> => vec![Declaration::Basic{name: p}],
+  <p: PID> => vec![Declaration::Atomic{name: p}],
   <p: PID> "[" <lhs: NUM> ":" <rhs: NUM> "]" => vec![Declaration::Array{name: p, num_lhs: lhs, num_rhs: rhs}],
 };
 
