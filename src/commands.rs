@@ -47,7 +47,7 @@ impl Compiler {
         match id {
             Var {name} => {
                 let var = stack.get(name).unwrap(); // undeclared variable error todo
-                //res.extend(Self::handle_variable_atomic(var));
+                res.extend(Self::handle_variable_atomic(var));
             }
             Array {name, var} => {
                 let var = stack.get(name).unwrap(); // undeclared variable error todo
@@ -77,6 +77,21 @@ impl Compiler {
             //
             //     res.push(ADD {pos: H});
              }
+        }
+
+        return res;
+    } 
+
+    pub fn handle_variable_atomic(var: &Variable) -> Vec<Instruction> {
+        let mut res: Vec<Instruction> = vec![];
+
+        match var {
+            Variable::Atomic {position} => {
+                res.extend(Self::set_reg_a(*position));
+            }
+            Variable::Array {position, lhs, rhs} => {
+                println!("Error"); // TODO;
+            }
         }
 
         return res;
