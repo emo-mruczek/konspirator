@@ -1,9 +1,12 @@
-// TODO: next -> naming the main params
+// procedury na koncu, nie mam pojecia, jak do nich podejsc nawet ;-; i wanna cry
 
 mod ast;
+mod instructions;
+mod compiler;
 
 use lalrpop_util::lalrpop_mod;
 use std::{env, io::{self, Write}, fs::{self, File}, process::exit};
+use crate::{compiler::Compiler, instructions::Instruction::{self, *}};
 
 
 lalrpop_mod!(parser);
@@ -30,26 +33,53 @@ fn main() -> io::Result<()> {
 
     println!("\n Compiling:\n\n {}", input_code);
 
-   
-
     /* parsing */
 
     let program = parser::PROGRAMALLParser::new().parse(&input_code);
 
+
+    // whole as(s)t dump
+    println!(" Successfully parsed\n");
+    println!("{:#?}", program); 
+
+    let mut instructions: Vec<Instruction> = vec![];
+
     match program {
-        Ok(_) => { //_ for now, in order to not move the program
-            println!(" Successfully parsed\n");
+        Ok(p) => { //_ for now, in order to not move the program
+            let compiler: Compiler::new(p);
+            instructions = compiler.compile();
         },
         Err(e) => panic!("Something's wrong! {e:}"), // TODO: for now
     };
 
+    /* needed to recheck the instructions in order to set the jump positions */
 
+    /* output */
+
+    println!("\n Compiled code:\n");
+
+    for (iter, instruction) in instructions.iter_mut().enumerate() {
         
-    // whole ast dump
-    println!("{:#?}", program); 
-    
+        match instruction {
+            JUMP {pos, adjust} | JPOS {pos, adjust} | JZERO {pos, adjust} => {
+                if *adjust {
+                    *pos = (iter as i64) + *pos;
+                    while *pos < 0 {
+                        *pos =  (iter as i64) + *pos;
+                    }
+                }
+            },
+            _ => {},
+        }
+        println!("{}", instruction); 
+    }
+
     // https://stackoverflow.com/questions/63713887/how-to-write-string-to-file
     let mut output_code = File::create(out_name)?;
+
+    for instruction in instructions.iter() {
+        write!(output_code, "{}\n", instruction)?;
+    }
 
     return Ok(());
 }
