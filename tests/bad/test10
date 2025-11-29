@@ -1,0 +1,6 @@
+PROCEDURE foo(I x IS IN
+    WRITE x;
+END
+
+PROGRAM IS IN END
+

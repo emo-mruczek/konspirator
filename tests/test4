@@ -1,0 +1,14 @@
+PROGRAM IS IN
+    IF a = b THEN
+        WRITE a;
+    ENDIF
+
+    IF a != b THEN
+        WRITE b;
+    ELSE
+        WRITE a;
+    ENDIF
+
+    IF x >= y THEN WRITE x; ENDIF
+END
+

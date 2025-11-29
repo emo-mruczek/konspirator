@@ -1,0 +1,6 @@
+PROGRAM IS
+    a[5:]
+IN
+    WRITE 1;
+END
+

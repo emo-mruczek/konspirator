@@ -10,6 +10,7 @@ pub type PID = String;
 // identifier -> pidentifier[pidentifier]
 // identifier -> pidentifier[num]
 
+#[derive(Debug)]
 pub enum Identifier {
     Var {
         name: PID,
@@ -27,6 +28,7 @@ pub enum Identifier {
 // value -> num 
 // value -> identifier 
 
+#[derive(Debug)]
 pub enum Value {
     Num {
         val: Num,
@@ -44,6 +46,7 @@ pub enum Value {
 // condition -> value >= value 
 // condition -> value <= value 
 
+#[derive(Debug)]
 pub enum Condition {
     Equal {
         l: Value,
@@ -78,6 +81,7 @@ pub enum Condition {
 // expression -> value / value 
 // expression -> value % value 
 
+#[derive(Debug)]
 pub enum Expression {
     Val {
         val: Value,
@@ -113,30 +117,31 @@ pub type Args = Vec<PID>;
 // TODO:
 // type -> T | I | O | 
 
+#[derive(Debug)]
 pub enum Type {
-    Array {
-        name: PID,
-    },
-    Const {
-        name: PID,
-    },
-    Undefined {
-        name: PID,
-    },
+    Array, 
+    Const,
+    Undefined,
 }
 
 // TODO:
 // args_decl -> args_decl, type pidentifier
 // args_decl -> type pidentifier
 
+#[derive(Debug)]
+pub struct ArgDecl {
+    pub type_name: Type,
+    pub name: PID,
+}
 
-pub type ArgsDecl = Vec<Type>;
+pub type ArgsDecl = Vec<ArgDecl>;
 
 // declarations -> declarations, pidentifier
 // declarations -> declarations, pidentifier[num:num]
 // declarations -> pidentifier
 // declarations -> pidentifier[num:num]
 
+#[derive(Debug)]
 pub enum Declaration {
     Basic {
         name: PID,
@@ -154,6 +159,7 @@ pub type Declarations = Vec<Declaration>;
 
 // proc_call -> pididentifier ( args )
 
+#[derive(Debug)]
 pub struct ProcCall {
     pub name: PID,
     pub args: Args,
@@ -161,6 +167,7 @@ pub struct ProcCall {
 
 // proc_head -> pididentifier ( args_decl )
 
+#[derive(Debug)]
 pub struct ProcHead {
     pub name: PID,
     pub args_decl: ArgsDecl,
@@ -177,6 +184,7 @@ pub struct ProcHead {
 // command -> READ identifier;
 // command -> WRITE value;
 
+#[derive(Debug)]
 pub enum Command {
     Assign {
         name: Identifier,
@@ -201,7 +209,7 @@ pub enum Command {
         val_lhs: Value,
         val_rhs: Value,
         comm: Commands,
-        is_downto: Bool,
+        is_downto: bool,
     },
     Call {
         call: ProcCall,
@@ -222,6 +230,7 @@ pub type Commands = Vec<Command>;
 // main -> PROGRAM IS declarations IN commands END
 // main -> PROGRAM IS IN commands END
 
+#[derive(Debug)]
 pub struct Main {
     pub declarations: Option<Declarations>,
     pub commands: Commands,
@@ -231,6 +240,8 @@ pub struct Main {
 // procedures -> procedures PROCEDURE proc_head IS IN commands END
 // <empty>
 
+
+#[derive(Debug)]
 pub struct Procedure { 
     pub proc_head: ProcHead,
     pub declarations: Option<Declarations>,
@@ -241,6 +252,8 @@ pub type Procedures = Vec<Procedure>;
 
 // program_all -> procedures main
 
+// in order to dump everything 
+#[derive(Debug)]
 pub struct ProgramAll {
     pub procedures: Option<Procedures>,
     pub main: Main,

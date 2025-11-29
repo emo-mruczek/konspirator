@@ -1,0 +1,25 @@
+PROCEDURE inc(I x, O y) IS IN
+    y := x + 1;
+END
+
+PROCEDURE sum3(I a, I b, I c, O out) IS
+    temp
+IN
+    temp := a + b;
+    out := temp + c;
+END
+
+PROGRAM IS
+    x,
+    y,
+    arr[1:3]
+IN
+    x := 10;
+    arr[1] := x;
+    arr[2] := x + 1;
+    arr[3] := x + 2;
+
+    sum3(arr[1], arr[2], arr[3], y);
+    WRITE y;
+END
+

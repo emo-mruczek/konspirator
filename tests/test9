@@ -1,0 +1,10 @@
+PROGRAM IS IN
+    IF a = b THEN
+        WHILE x < 10 DO
+            IF y > 0 THEN
+                y := y - 1;
+            ENDIF
+        ENDWHILE
+    ENDIF
+END
+

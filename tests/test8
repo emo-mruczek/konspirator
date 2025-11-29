@@ -1,0 +1,15 @@
+PROCEDURE sumarr(T arr, I len, O out) IS
+    i,
+    acc
+IN
+    acc := 0;
+    FOR i FROM 1 TO len DO
+        acc := acc + arr[i];
+    ENDFOR
+    out := acc;
+END
+
+PROGRAM IS IN
+    WRITE 1;
+END
+

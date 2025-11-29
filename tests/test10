@@ -1,0 +1,10 @@
+PROGRAM IS
+    x,
+    y,
+    z[2:8]
+IN
+    x := z[5];
+    y[foo] := z[x];
+    WRITE y[foo];
+END
+

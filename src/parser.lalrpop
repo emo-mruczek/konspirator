@@ -57,20 +57,20 @@ ARGS: Args = {
 
 ARGSDECL: ArgsDecl = {
  <mut v: ARGSDECL> "," "T" <p: PID> => {
-    v.push(Type::Array{name: p});
+    v.push(ArgDecl{type_name: Type::Array, name: p});
     return v;
  },
  <mut v: ARGSDECL> "," "I" <p: PID> => {
-    v.push(Type::Const{name: p});
+    v.push(ArgDecl{type_name: Type::Const, name: p});
     return v;
  },
  <mut v: ARGSDECL> "," "O" <p: PID> => {
-    v.push(Type::Undefined{name: p});
+    v.push(ArgDecl{type_name: Type::Undefined, name: p});
     return v;
  },
- "T" <p: PID> => vec![Type::Array{name: p}],
- "I" <p: PID> => vec![Type::Const{name: p}];
- "O" <p: PID> => vec![Type::Undefined{name: p}],
+ "T" <p: PID> => vec![ArgDecl{type_name: Type::Array, name: p}],
+ "I" <p: PID> => vec![ArgDecl{type_name: Type::Const, name: p}],
+ "O" <p: PID> => vec![ArgDecl{type_name: Type::Undefined, name: p}],
 }
 
 // TODO
@@ -105,8 +105,8 @@ COMMAND: Command = {
   "IF" <c: CONDITION> "THEN" <com: COMMANDS> "ENDIF" => Command::If{cond: c, comm: com, else_comm: None},
   "WHILE" <c: CONDITION> "DO" <com: COMMANDS> "ENDWHILE" => Command::While{cond: c, comm: com},
   "REPEAT" <com: COMMANDS> "UNTIL" <c: CONDITION> ";" => Command::Repeat{comm: com, cond: c},
-  "FOR" <p: PID> "FROM" <lhs: VALUE> "TO" <rhs: VALUE> "DO" <com: COMMANDS> "ENDFOR" => Command:For{pid: p, val_lhs: lhs, val_rhs: rhs, comm: com, is_downto: false},
-  "FOR" <p: PID> "FROM" <lhs: VALUE> "DOWNTO" <rhs: VALUE> "DO" <com: COMMANDS> "ENDFOR" => Command:For{pid: p, val_lhs: lhs, val_rhs: rhs, comm: com, is_downto: true},
+  "FOR" <p: PID> "FROM" <lhs: VALUE> "TO" <rhs: VALUE> "DO" <com: COMMANDS> "ENDFOR" => Command::For{pid: p, val_lhs: lhs, val_rhs: rhs, comm: com, is_downto: false},
+  "FOR" <p: PID> "FROM" <lhs: VALUE> "DOWNTO" <rhs: VALUE> "DO" <com: COMMANDS> "ENDFOR" => Command::For{pid: p, val_lhs: lhs, val_rhs: rhs, comm: com, is_downto: true},
   <p: PROCCALL> ";" => Command::Call{call: p},
   "READ" <i: IDENTIFIER> ";" => Command::Read{name: i},
   "WRITE" <v: VALUE> ";" => Command::Write{val: v}, 
@@ -121,13 +121,9 @@ COMMANDS: Commands = {
   <c: COMMAND> => vec![c],
 };
 
-// TODO Main
-
 MAIN: Main = {
-  "PROGRAM" "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => Main{declarations: d, commands: ca},
+  "PROGRAM" "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => Main{declarations: d, commands: c},
 };
-
-// END TODO
 
 PROCEDURES: Procedures = {
   <mut p: PROCEDURES> "PROCEDURE" <pc: PROCHEAD> "IS" <d: DECLARATIONS?> "IN" <c: COMMANDS> "END" => {
@@ -140,8 +136,6 @@ PROCEDURES: Procedures = {
 pub PROGRAMALL: ProgramAll = {
   <p: PROCEDURES?> <m: MAIN> => ProgramAll{ procedures: p, main: m},
 };
-
-// TODO match
 
 match {
     "+",
@@ -159,7 +153,7 @@ match {
     "T",
     ":",
     "I",
-    "O"
+    "O",
     r"[0-9]+",
     r"[_a-z]+",
     "[",
@@ -181,7 +175,6 @@ match {
     "FROM",
     "TO",
     "DOWNTO",
-    "DO",
     "ENDFOR",
     "READ",
     "WRITE",
@@ -194,7 +187,4 @@ match {
     r"\s*" => {}, // whitespaces
     r"#[^\n\r]*[\n\r]*" => {}, // comments
 }
-
-// END TODO
-
 
