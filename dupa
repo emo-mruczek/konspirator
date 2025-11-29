@@ -1,1 +1,4 @@
+RST a
+INC a
+WRITE
 HALT

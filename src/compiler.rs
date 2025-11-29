@@ -75,7 +75,7 @@ impl Compiler {
         for command in commands {
             match command {
                 Assign {name, expr} => {
-                    println!("  Assign");
+                    println!("  Assign")
                    // let res = Self::command_assign(&name, &expr, initialized, &stack);
                    // ret.extend(res);
                 }
@@ -110,8 +110,8 @@ impl Compiler {
                 }
                 Write {val} => {
                     println!("  Write");
-                    //let res = Self::command_write(&val, &stack);
-                    //ret.extend(res);
+                    let res = Self::command_write(val);
+                    ret.extend(res);
                 }
             }
         }

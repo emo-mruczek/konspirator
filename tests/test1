@@ -3,8 +3,9 @@ PROGRAM IS
     b,
     c[1:10]
 IN
-    a := 5;
-    b := a;
-    WRITE b;
+    WRITE 1;
+    #a := 5;
+    #b := a;
+    #WRITE b;
 END
 

@@ -3,6 +3,7 @@
 mod ast;
 mod instructions;
 mod compiler;
+mod commands;
 
 use lalrpop_util::lalrpop_mod;
 use std::{env, io::{self, Write}, fs::{self, File}, process::exit};
