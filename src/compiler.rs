@@ -100,8 +100,8 @@ impl Compiler {
                 Call {call} => println!("Call"),
                 Read {name} => {
                     println!("  Read");
-                    //let res = Self::command_read(&name, initialized, &stack);
-                    //ret.extend(res);
+                    let res = Self::command_read(&name, initialized, &stack);
+                    ret.extend(res);
                 }
                 Write {val} => {
                     println!("  Write");

@@ -30,6 +30,22 @@ impl Compiler {
         return res;
     }
 
+    pub fn command_read(id: &Identifier, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+
+        let mut res: Vec<Instruction> = vec![];
+
+        res.extend(Self::get_variable(id, stack, initialized));
+
+       // res.push(PUT {pos: G});
+        res.push(SWP {pos: G});
+        res.push(READ);
+        res.push(RSTORE {pos: G});
+
+        initialized.insert(Self::get_name(&id)); 
+
+        return res;
+    }
+
 
 
     pub fn command_write(val: &Value,  stack: &HashMap<String, Variable>, initialized: &HashSet<String>) -> Vec<Instruction> {
@@ -81,8 +97,8 @@ impl Compiler {
                 // TODO; out of bounds exeption
             
                  let index_var = stack.get(var).unwrap(); // TODO: error returning
-                 res.extend(Self::handle_variable_atomic(index_var));  
-
+                 //res.extend(Self::handle_variable_atomic(index_var)); 
+                
                  let array_var = stack.get(name).unwrap();
             
                  res.push(RLOAD {pos: A});
@@ -94,13 +110,18 @@ impl Compiler {
                          println!("problemix");
                      },
                      Variable::Array {position, lhs, rhs} => {
+                        
   
                          // TODO: bounds checking
                         // sprawdzenie, ile wynosi wartosc variable 
                         // sprawdzenie, czy ta wartosc jest w bounds 
                         // pozycja w regex obliczona jak w Array indeksowanym wtedy wartością
                         // zwykłą (liczbą)
-                         res.extend(Self::set_reg_a(*position));
+                        // okay wiec set reg a musi byc dosc specjalnie obsluzony - byc moze nowy
+                        // dla tego wlasnie przypadku? nie wiemu, ile wynosi w naszym przypadku
+                        // offset, poniewaz kryje się on za zmienną, tak więc nie mam pojecia
+                         let offset: u64 = 0;
+                         res.extend(Self::set_reg_a(position + offset));
                      },
                  }
             
