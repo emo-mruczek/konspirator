@@ -5,6 +5,7 @@ mod instructions;
 mod compiler;
 mod commands;
 mod helpers;
+mod expressions;
 
 use lalrpop_util::lalrpop_mod;
 use std::{env, io::{self, Write}, fs::{self, File}, process::exit};

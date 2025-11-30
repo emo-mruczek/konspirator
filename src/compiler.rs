@@ -70,9 +70,9 @@ impl Compiler {
         for command in commands {
             match command {
                 Assign {name, expr} => {
-                    println!("  Assign")
-                   // let res = Self::command_assign(&name, &expr, initialized, &stack);
-                   // ret.extend(res);
+                    println!("  Assign");
+                    let res = Self::command_assign(&name, &expr, initialized, &stack);
+                    ret.extend(res);
                 }
                 If {cond, comm, else_comm} => {
                     println!("  If");

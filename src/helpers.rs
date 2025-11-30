@@ -43,4 +43,25 @@ impl Compiler {
         return res;
     }
 
+    pub fn is_initialized(val: &Value, initialized: &mut HashSet<String>) {
+        match val {
+            Value::Num {val} => {},
+            Value::Var {val} => {
+                if !initialized.contains(&Self::get_name(val)) {
+                    panic!("not initialized"); // TODO: handling
+                }
+            }
+        }
+    }
+
+    pub fn get_name(id: &Identifier) -> String {
+        let name = match id {
+            Var {name} => name,
+            Array {name, var} => name,
+            Array_Var {name, var} => name,
+        };
+
+        return name.clone();
+    }
+
 }
