@@ -105,7 +105,7 @@ impl Compiler {
                 }
                 Write {val} => {
                     println!("  Write");
-                    let res = Self::command_write(val, stack);
+                    let res = Self::command_write(val, stack, initialized);
                     ret.extend(res);
                 }
             }

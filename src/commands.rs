@@ -1,5 +1,3 @@
-// TODO: arrays
-
 /* commands */
 
 use crate::instructions::Instruction::{self, *};
@@ -52,7 +50,7 @@ impl Compiler {
                 res.extend(Self::set_reg_a(*val));
             },
             Value::Var {val} => {
-                res.extend(Self::get_variable(val, &stack, &initialized));
+                res.extend(Self::get_variable(val, &stack, initialized));
                 res.push(RLOAD {pos: A}); // A = wartość w komórce o numerze będącym w A
             },
         }
@@ -68,13 +66,13 @@ impl Compiler {
                 let variable = stack.get(name).unwrap(); // undeclared variable error todo
                 res.extend(Self::handle_variable_atomic(variable));
             }
-            // TODO: tests for both arrays
             Array {name, var} => { // var is a num in this case
                 let variable = stack.get(name).unwrap(); // undeclared variable error todo
                 res.extend(Self::handle_variable_array(variable, *var));
 
             }
-            // TODO: !!!!!!!!
+           // TODO: !!!!!!!!
+            // no i przenieść to do swojej własnej funkcji
             Array_Var {name, var} => {
                  if !initialized.contains(var) {
                      panic!("not initialized"); // TODOL error returning
@@ -98,6 +96,10 @@ impl Compiler {
                      Variable::Array {position, lhs, rhs} => {
   
                          // TODO: bounds checking
+                        // sprawdzenie, ile wynosi wartosc variable 
+                        // sprawdzenie, czy ta wartosc jest w bounds 
+                        // pozycja w regex obliczona jak w Array indeksowanym wtedy wartością
+                        // zwykłą (liczbą)
                          res.extend(Self::set_reg_a(*position));
                      },
                  }
@@ -132,7 +134,7 @@ impl Compiler {
                 if value >= *rhs || value < *lhs {
                    println!("problemix! out od bounds"); // error out of bounds exception 
                 }
-                let offset: u64 = value - *lhs; 
+                let offset: u64 = value - lhs; 
                 res.extend(Self::set_reg_a(position + offset));
             },
         }

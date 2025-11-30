@@ -16,29 +16,29 @@ impl Compiler {
             Val {val} => {
                 Self::is_initialized(&val, initialized);
 
-                res.extend(Self::handle_value(val, stack));
+                res.extend(Self::handle_value(val, stack, initialized));
             },
             Add {l, r} => {
-                // Self::is_initialized(&l, initialized);
-                // Self::is_initialized(&r, initialized);
-                //
-                // //TODO: perform addition in compile-time to reduce number of instructions
-                //
-                // res.extend(Self::handle_value(l, stack));
-                // res.push(PUT {pos: B});
-                // res.extend(Self::handle_value(r, stack));
-                // res.push(ADD {pos: B});
+                 Self::is_initialized(&l, initialized);
+                 Self::is_initialized(&r, initialized);
+                
+                 //TODO: perform addition in compile-time to reduce number of instructions
+                
+                 res.extend(Self::handle_value(l, stack, initialized));
+                 res.push(SWP {pos: B});
+                 res.extend(Self::handle_value(r, stack, initialized));
+                 res.push(ADD {pos: B});
             },
             Sub {l, r} => {
                 // obsluga ujemych???
-                // Self::is_initialized(&l, initialized);
-                // Self::is_initialized(&r, initialized);
-                //
-                // res.extend(Self::handle_value(r, stack));
-                // res.push(PUT {pos: B});
-                // res.extend(Self::handle_value(l, stack));
-                // res.push(SUB {pos: B});
-                //
+                Self::is_initialized(&l, initialized);
+                Self::is_initialized(&r, initialized);
+
+                res.extend(Self::handle_value(r, stack, initialized));
+                res.push(SWP {pos: B});
+                res.extend(Self::handle_value(l, stack, initialized));
+                res.push(SUB {pos: B});
+
             },
             Mul {l, r} => {
 
