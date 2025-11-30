@@ -6,6 +6,9 @@ mod compiler;
 mod commands;
 mod helpers;
 mod expressions;
+mod if_conditions;
+mod while_conditions;
+mod repeat_conditions;
 
 use lalrpop_util::lalrpop_mod;
 use std::{env, io::{self, Write}, fs::{self, File}, process::exit};

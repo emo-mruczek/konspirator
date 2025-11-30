@@ -76,23 +76,18 @@ impl Compiler {
                 }
                 If {cond, comm, else_comm} => {
                     println!("  If");
-                   // let res = Self::command_if(&cond, &comm, &else_comm, initialized, &stack);
-
-                   // ret.extend(res);
+                    let res = Self::command_if(&cond, &comm, &else_comm, initialized, &stack);
+                    ret.extend(res);
                 },
                 While {cond, comm} => {
-                    println!("  While");
-                   // let res = Self::command_while(&cond, &comm, initialized, &stack);
-
-                   // ret.extend(res);
+                   println!("  While");
+                   let res = Self::command_while(&cond, &comm, initialized, &stack);
+                   ret.extend(res);
                 },
                 Repeat {comm, cond} => {
-
-                    println!("  Repeat");
-                   // let res = Self::command_repeat(&cond, &comm, initialized, &stack);
-
-                   // ret.extend(res);
- 
+                   println!("  Repeat");
+                   let res = Self::command_repeat(&cond, &comm, initialized, &stack);
+                   ret.extend(res);
                 },
                 For {pid, val_lhs, val_rhs, comm, is_downto} => {
                     println!("  For");

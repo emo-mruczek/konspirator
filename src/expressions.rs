@@ -41,7 +41,7 @@ impl Compiler {
 
             },
             Mul {l, r} => {
-
+// TODO
                 Self::is_initialized(&l, initialized);
                 Self::is_initialized(&r, initialized);
 
@@ -53,6 +53,7 @@ impl Compiler {
 
             },
             Div {l, r} => { //TODO: dzielenie przez zero
+                // TODO:
                 Self::is_initialized(l, initialized);
                 Self::is_initialized(r, initialized);
 
@@ -63,6 +64,7 @@ impl Compiler {
                 res.extend(Self::construct_division());
             },
             Mod {l, r} => {
+                // TODO
                 Self::is_initialized(l, initialized);
                 Self::is_initialized(r, initialized);
 
