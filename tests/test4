@@ -3,7 +3,6 @@ PROGRAM IS
 IN
 
     READ a;
-    READ b;
 
    # IF a > b THEN
    #     WRITE 1;
@@ -11,11 +10,15 @@ IN
    #     WRITE 2;
    # ENDIF
 
-   WHILE a <= b DO
-      WRITE 2137;
-      a := a + 1;
-  ENDWHILE
+  # WHILE a <= b DO
+  #    WRITE 2137;
+  #    a := a + 1;
+  #ENDWHILE
 
+  REPEAT
+    WRITE 2147;
+    a := a - 1;
+  UNTIL a = 0;
 
 END
 

@@ -228,7 +228,7 @@ impl Compiler {
         return res;
     }
 
-        pub fn command_while(cond: &Condition, comm: &Vec<Command>, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+        pub fn command_while(cond: &Condition, comm: &Vec<Command>, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable> ) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
 
         let mut block_instructions: Vec<Instruction> = vec![];
@@ -270,22 +270,22 @@ impl Compiler {
 
         match cond {
             Condition::Equal {l, r} => {
-                conditions.extend(Self::repeat_handle_equal(l, r, stack, &block_instructions));
+                conditions.extend(Self::repeat_handle_equal(l, r, stack, &block_instructions, initialized));
             },
             Condition::NotEqual {l, r} => {
-                conditions.extend(Self::repeat_handle_notequal(l, r, stack, &block_instructions));
+                conditions.extend(Self::repeat_handle_notequal(l, r, stack, &block_instructions, initialized));
             },
             Condition::Greater {l, r} => {
-                conditions.extend(Self::repeat_handle_greater(l, r, stack, &block_instructions));
+                conditions.extend(Self::repeat_handle_greater(l, r, stack, &block_instructions, initialized));
             },
             Condition::Less {l, r} => {
-                conditions.extend(Self::repeat_handle_less(l, r, stack, &block_instructions));
+                conditions.extend(Self::repeat_handle_less(l, r, stack, &block_instructions, initialized));
             },
             Condition::GreaterEqual {l, r} => {
-                conditions.extend(Self::repeat_handle_greaterequal(l, r, stack, &block_instructions));
+                conditions.extend(Self::repeat_handle_greaterequal(l, r, stack, &block_instructions, initialized));
             },
             Condition::LessEqual {l, r} => {
-                conditions.extend(Self::repeat_handle_lessequal(l, r, stack, &block_instructions));
+                conditions.extend(Self::repeat_handle_lessequal(l, r, stack, &block_instructions, initialized));
             },
         }
 
