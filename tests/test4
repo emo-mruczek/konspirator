@@ -1,14 +1,15 @@
-PROGRAM IS IN
-    IF a = b THEN
-        WRITE a;
-    ENDIF
+PROGRAM IS
+  a, b
+IN
 
-    IF a != b THEN
-        WRITE b;
+    READ a;
+    READ b;
+
+    IF a > b THEN
+        WRITE 1;
     ELSE
-        WRITE a;
+        WRITE 2;
     ENDIF
 
-    IF x >= y THEN WRITE x; ENDIF
 END
 

@@ -1,9 +1,0 @@
-PROGRAM IS IN
-    a := 1;
-    b := a + 5;
-    c := a - b;
-    d := a * b;
-    e := d / 2;
-    f := e % 3;
-END
-

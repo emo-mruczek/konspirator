@@ -1,6 +1,0 @@
-PROGRAM IS IN
-    x := 1;
-    y[foo] := x;
-    z[3] := y[bar];
-END
-

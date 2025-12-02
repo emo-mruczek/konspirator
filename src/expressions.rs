@@ -9,7 +9,7 @@ use crate::helpers::Variable;
 
 impl Compiler {
     
-    pub fn handle_expression(expression: &Expression, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+    pub fn handle_expression(expression: &Expression, initialized: &mut HashSet<String>, stack: & HashMap<String, Variable>) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
         
         match expression {

@@ -1,4 +1,0 @@
-PROGRAM IS IN
-    IF x < THEN WRITE x; ENDIF
-END
-

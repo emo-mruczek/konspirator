@@ -1,5 +1,0 @@
-PROGRAM IS IN
-    IF x = 1 THEN
-        WRITE x;
-END
-

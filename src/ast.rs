@@ -122,6 +122,7 @@ pub enum Type {
     Array, 
     Const,
     Undefined,
+    Scalar
 }
 
 // TODO:

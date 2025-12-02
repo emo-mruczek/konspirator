@@ -1,32 +1,6 @@
 RST a
 SWP g
-RST a
-INC a
-SHL a
-SWP b
-RST a
-INC a
-SHL a
-INC a
-SWP c
-SWP e
-RST d
-SWP c
-JZERO 28
-SHR e
-SHL e
-SWP c
-SUB e
-JZERO 23
-SWP d
-ADD b
-SWP d
-SHL b
-SHR c
-SWP c
-SWP e
-JUMP 13
-SWP d
+READ
 RSTORE g
 RST a
 INC a
@@ -36,5 +10,17 @@ RSTORE g
 RST a
 INC a
 RLOAD a
+SWP b
+RST a
+RLOAD a
+SUB b
+JPOS 22
+RST a
+INC a
+SHL a
+WRITE
+JUMP 25
+RST a
+INC a
 WRITE
 HALT

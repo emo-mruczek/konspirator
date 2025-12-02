@@ -1,6 +1,6 @@
 PROGRAM IS
-    a,
-    b
+    a
+    #b
    # c[2:10]
 IN
 
@@ -12,9 +12,11 @@ IN
     #WRITE 5;
     #WRITE 6;
 
-   # a := 4;
+    #a := 4;
+    #WRITE a;
    # b := a;
-    #WRITE b;
+  
+  #WRITE b;
 
 
     #c[2] := 3;
@@ -37,9 +39,10 @@ IN
    # WRITE c[6];
    # WRITE c[5];
     #WRITE c[8];
-    a := 2 * 3;
-    READ b;
-    WRITE b;
+    a := 2 * 5;
+   # READ b;
+   # WRITE b;
+   WRITE a;
 
 
 END

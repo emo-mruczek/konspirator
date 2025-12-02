@@ -1,8 +1,0 @@
-PROCEDURE alpha(T a, I b, O c) IS IN
-    c := b;
-END
-
-PROGRAM IS IN
-    alpha(x, 5, z);
-END
-

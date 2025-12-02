@@ -48,7 +48,7 @@ impl Compiler {
 
 
 
-    pub fn command_write(val: &Value,  stack: &HashMap<String, Variable>, initialized: &HashSet<String>) -> Vec<Instruction> {
+    pub fn command_write(val: &Value,  stack: &HashMap<String, Variable>, initialized: &mut HashSet<String>) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
 
         res.extend(Self::handle_value(val, stack, initialized));
@@ -58,7 +58,7 @@ impl Compiler {
         return res;
     }
 
-    pub fn handle_value(val: &Value,  stack: &HashMap<String, Variable>, initialized: &HashSet<String>) -> Vec<Instruction> {
+    pub fn handle_value(val: &Value,  stack: &HashMap<String, Variable>, initialized: &mut HashSet<String>) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
 
         match val {
@@ -120,6 +120,19 @@ impl Compiler {
                         // okay wiec set reg a musi byc dosc specjalnie obsluzony - byc moze nowy
                         // dla tego wlasnie przypadku? nie wiemu, ile wynosi w naszym przypadku
                         // offset, poniewaz kryje się on za zmienną, tak więc nie mam pojecia
+                        //
+                        //
+                        // laduje do A pozycje czyli set A na pozycje
+                        // biore inny rejestr i wrzucam tam lewą stroną
+                        // odejmuje od pozycji lewa strone
+                        // teraz mamy obliczony ofset w A 
+                        // a chcemy miec pozycje na stacku 
+                        // wiec swap z jeszcze innym rejestrem
+                        // w A ustawiam poczatek arraaya 
+                        // ADD z rejestrem z offetem 
+                        //
+                        // no i checkowanie out of bounds
+                        // jak cos to undefined behaviour
                          let offset: u64 = 0;
                          res.extend(Self::set_reg_a(position + offset));
                      },
@@ -193,22 +206,22 @@ impl Compiler {
 
         match cond {
             Condition::Equal {l, r} => {
-                res.extend(Self::if_handle_equal(l, r, stack, &block_instructions, &else_block_instructions));
+                res.extend(Self::if_handle_equal(l, r, stack, &block_instructions, &else_block_instructions, initialized));
             },
             Condition::NotEqual {l, r} => {
-                res.extend(Self::if_handle_notequal(l, r, stack, &block_instructions, &else_block_instructions));
+                    res.extend(Self::if_handle_notequal(l, r, stack, &block_instructions, &else_block_instructions, initialized));
             },
             Condition::Greater {l, r} => {
-                res.extend(Self::if_handle_greater(l, r, stack, &block_instructions, &else_block_instructions));
+                res.extend(Self::if_handle_greater(l, r, stack, &block_instructions, &else_block_instructions, initialized));
             },
             Condition::Less {l, r} => {
-                res.extend(Self::if_handle_less(l, r, stack, &block_instructions, &else_block_instructions));
+                res.extend(Self::if_handle_less(l, r, stack, &block_instructions, &else_block_instructions, initialized));
             },
             Condition::GreaterEqual {l, r} => {
-                res.extend(Self::if_handle_greaterequal(l, r, stack, &block_instructions, &else_block_instructions));
+                res.extend(Self::if_handle_greaterequal(l, r, stack, &block_instructions, &else_block_instructions, initialized));
             },
             Condition::LessEqual {l, r} => {
-                res.extend(Self::if_handle_lessequal(l, r, stack, &block_instructions, &else_block_instructions));
+                res.extend(Self::if_handle_lessequal(l, r, stack, &block_instructions, &else_block_instructions, initialized));
             },
         }
         
@@ -282,4 +295,9 @@ impl Compiler {
         return res;
     }
 
+    // pub fn command_for(cond: &Condition, comm: &Vec<Command>, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>, bool: is_downto) -> Vec<Instruction> {
+    //     let mut res: Vec<Instruction> = vec![];
+    //
+    //     return res;
+    // }
 }
