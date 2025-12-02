@@ -5,11 +5,17 @@ IN
     READ a;
     READ b;
 
-    IF a > b THEN
-        WRITE 1;
-    ELSE
-        WRITE 2;
-    ENDIF
+   # IF a > b THEN
+   #     WRITE 1;
+   # ELSE
+   #     WRITE 2;
+   # ENDIF
+
+   WHILE a <= b DO
+      WRITE 2137;
+      a := a + 1;
+  ENDWHILE
+
 
 END
 

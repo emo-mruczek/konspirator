@@ -14,13 +14,33 @@ SWP b
 RST a
 RLOAD a
 SUB b
-JPOS 22
+JPOS 45
 RST a
 INC a
 SHL a
-WRITE
-JUMP 25
-RST a
+SHL a
+SHL a
+SHL a
+SHL a
+INC a
+SHL a
+SHL a
+INC a
+SHL a
+INC a
+SHL a
+SHL a
+SHL a
 INC a
 WRITE
+RST a
+SWP g
+RST a
+RLOAD a
+SWP b
+RST a
+INC a
+ADD b
+RSTORE g
+JUMP 9
 HALT

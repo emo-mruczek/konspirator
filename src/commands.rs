@@ -209,7 +209,7 @@ impl Compiler {
                 res.extend(Self::if_handle_equal(l, r, stack, &block_instructions, &else_block_instructions, initialized));
             },
             Condition::NotEqual {l, r} => {
-                    res.extend(Self::if_handle_notequal(l, r, stack, &block_instructions, &else_block_instructions, initialized));
+                res.extend(Self::if_handle_notequal(l, r, stack, &block_instructions, &else_block_instructions, initialized));
             },
             Condition::Greater {l, r} => {
                 res.extend(Self::if_handle_greater(l, r, stack, &block_instructions, &else_block_instructions, initialized));
@@ -236,22 +236,22 @@ impl Compiler {
 
         match cond {
             Condition::Equal {l, r} => {
-                res.extend(Self::while_handle_equal(l, r, stack, &block_instructions));
+                res.extend(Self::while_handle_equal(l, r, stack, &block_instructions, initialized));
             },
             Condition::NotEqual {l, r} => {
-                res.extend(Self::while_handle_notequal(l, r, stack, &block_instructions));
+                res.extend(Self::while_handle_notequal(l, r, stack, &block_instructions, initialized));
             },
             Condition::Greater {l, r} => {
-                res.extend(Self::while_handle_greater(l, r, stack, &block_instructions));
+                res.extend(Self::while_handle_greater(l, r, stack, &block_instructions, initialized));
             },
             Condition::Less {l, r} => {
-                res.extend(Self::while_handle_less(l, r, stack, &block_instructions));
+                res.extend(Self::while_handle_less(l, r, stack, &block_instructions, initialized));
             },
             Condition::GreaterEqual {l, r} => {
-                res.extend(Self::while_handle_greaterequal(l, r, stack, &block_instructions));
+                res.extend(Self::while_handle_greaterequal(l, r, stack, &block_instructions, initialized));
             },
             Condition::LessEqual {l, r} => {
-                res.extend(Self::while_handle_lessequal(l, r, stack, &block_instructions));
+                res.extend(Self::while_handle_lessequal(l, r, stack, &block_instructions, initialized));
             },
         }
 

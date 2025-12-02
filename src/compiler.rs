@@ -1,5 +1,8 @@
 /* compiler */
 
+
+// TODO: liczby ujemne
+
 use crate::ast::{Command::*, *};
 use crate::instructions::Instruction::{self, *};
 use std::collections::{HashMap, HashSet};
