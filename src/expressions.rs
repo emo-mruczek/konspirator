@@ -120,6 +120,10 @@ impl Compiler {
        // res.push(PUT {pos: E});
           res.push(SWP {pos: E});
 
+        // wystarfzy sprawdzi,c jak to jest handlowane w REPEAT itp itd, tam tez jest ten offset
+        // ustawiany, jakos na podstawie obecnej dlugosci res, bowiem jak dodamy znowu set_reg_a,
+        // to nie wazne, ile z niej instrukcji nowych wyplynie, bo i tak bedziemy miec to w res, a
+        // potem bierzemy len tego res
         res.push(JUMP {pos: -14, adjust: true});
 
 

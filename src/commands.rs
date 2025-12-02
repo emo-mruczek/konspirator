@@ -113,13 +113,6 @@ impl Compiler {
                         
   
                          // TODO: bounds checking
-                        // sprawdzenie, ile wynosi wartosc variable 
-                        // sprawdzenie, czy ta wartosc jest w bounds 
-                        // pozycja w regex obliczona jak w Array indeksowanym wtedy wartością
-                        // zwykłą (liczbą)
-                        // okay wiec set reg a musi byc dosc specjalnie obsluzony - byc moze nowy
-                        // dla tego wlasnie przypadku? nie wiemu, ile wynosi w naszym przypadku
-                        // offset, poniewaz kryje się on za zmienną, tak więc nie mam pojecia
                         //
                         //
                         // laduje do A pozycje czyli set A na pozycje
@@ -133,8 +126,19 @@ impl Compiler {
                         //
                         // no i checkowanie out of bounds
                         // jak cos to undefined behaviour
-                         let offset: u64 = 0;
-                         res.extend(Self::set_reg_a(position + offset));
+
+                        res.extend(Self::set_reg_a(*lhs)); // A = lhs wartosc 
+                        res.push(SWP {pos: F}); // F = A, czyli lhs wartosc 
+                        res.extend(Self::set_reg_a(*position)); // A = position, ale czy tutaj w
+                        // sumie nie powinien byc przypadkiem zmienna index_var? xd
+                        res.push(SUB {pos: F}); // A = F - A, czyyyli w A mamy offset!
+                        res.push(SWP {pos: G}); // w G offset 
+                        res.push(SWP {pos: F}); // w A mamy lhs 
+                        //res.push()
+                        
+                        
+                         //let offset: u64 = 0;
+                         //res.extend(Self::set_reg_a(position + offset));
                      },
                  }
             
@@ -146,14 +150,14 @@ impl Compiler {
     } 
 
     // array but variable-indexed
-    pub fn handle_variable_array_variable(var: &Variable, value: u64) -> Vec<Instruction> {
-        let mut res: Vec<Instruction> = vec![];
-
-
-
-
-        return res;
-    }
+    // pub fn handle_variable_array_variable(var: &Variable, value: u64) -> Vec<Instruction> {
+    //     let mut res: Vec<Instruction> = vec![];
+    //
+    //
+    //
+    //
+    //     return res;
+    // }
 
     pub fn handle_variable_array(var: &Variable, value: u64) -> Vec<Instruction> { // array but
         // num-indexed
