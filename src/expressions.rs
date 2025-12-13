@@ -49,6 +49,8 @@ impl Compiler {
                 res.push(SWP {pos: B});
                 res.extend(Self::handle_value(r, stack, initialized));
                 res.push(SWP {pos: C});
+res.extend(Self::handle_value(r, stack, initialized));
+                res.push(SWP {pos: D});
                 res.extend(Self::construct_multiplication());
 
             },
@@ -79,58 +81,42 @@ impl Compiler {
         return res;
     }
 
-// TODOL:!!!!!!
     pub fn construct_multiplication() -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
         // w B i C są już mnożone wartości    
+       res.push(RST {pos: A}); 
+       res.push(SWP {pos: C});
 
-       // res.push(PUT {pos: E}); // do E kladziemy A 
-        res.push(SWP {pos: E});  // E == A i A == E (zamiana)
-        res.push(RST {pos: D}); // D = 0
-        
-       // res.push(GET {pos: C}); // A == C
-        res.push(SWP {pos:C});
+       res.push(JZERO {pos: 19, adjust: true});
 
-        res.push(JZERO {pos: 14, adjust: true});
-        res.push(SHR {pos: E});
-        res.push(SHL {pos: E});
+       res.push(SHR {pos: A}); 
+       res.push(SHL {pos: A}); 
+       res.push(SWP {pos: D}); 
+       res.push(SUB {pos: D});
 
-       // res.push(GET {pos: C});
-        res.push(SWP {pos:C});
+       res.push(JPOS {pos: 5 , adjust: true});
 
-        res.push(SUB {pos: E});
-        res.push(JZERO {pos: 4, adjust: true});
+       res.push(ADD {pos: D}); 
+       res.push(SWP {pos: D}); 
+       res.push(SWP {pos: C}); 
 
+       res.push(JUMP {pos: 6, adjust: true }); 
 
-       // res.push(GET {pos: D});
-        res.push(SWP {pos: D});
+       res.push(ADD {pos: D}); 
+       res.push(SWP {pos: D}); 
+       res.push(INC {pos: A}); 
+       res.push(SWP {pos: C}); 
+       res.push(ADD {pos: B}); 
+       res.push(SHL {pos: B}); 
+       res.push(SHR {pos: D}); 
+       res.push(SHR {pos: C}); 
 
-        res.push(ADD {pos: B});
+       res.push(JUMP {pos: -19, adjust: true});
 
-        // res.push(PUT {pos: D});
-        res.push(SWP{pos: D});
-
-        res.push(SHL {pos: B});
-        res.push(SHR {pos: C});
-
-
-       // res.push(GET {pos: C});
-          res.push(SWP {pos:C});
-
-       // res.push(PUT {pos: E});
-          res.push(SWP {pos: E});
-
-        // wystarfzy sprawdzi,c jak to jest handlowane w REPEAT itp itd, tam tez jest ten offset
-        // ustawiany, jakos na podstawie obecnej dlugosci res, bowiem jak dodamy znowu set_reg_a,
-        // to nie wazne, ile z niej instrukcji nowych wyplynie, bo i tak bedziemy miec to w res, a
-        // potem bierzemy len tego res
-        res.push(JUMP {pos: -14, adjust: true});
+        res.push(SWP {pos: C});
 
 
-       // res.push(GET {pos: D});
-        res.push(SWP {pos:D});
-
-        return res;
+       return res;
     } 
 
     pub fn construct_division() -> Vec<Instruction> {
