@@ -60,7 +60,7 @@ impl Compiler {
                         Declaration::Array {name, num_lhs, num_rhs} => {
                             self.stack.insert(name, Variable::Array {position: self.sp, lhs: num_lhs, rhs: num_rhs});
                             println!("SP: {}", self.sp);
-                            self.sp += num_rhs - num_lhs; // prob ok
+                            self.sp += num_rhs - num_lhs + 1;  // prob ok FIXME + 1??
                         }
                     }
                 }
@@ -104,11 +104,10 @@ impl Compiler {
                    let res = Self::command_repeat(&cond, &comm, initialized, &stack);
                    ret.extend(res);
                 },
-            // TODO: change to cond? instead of vals 
                 For {pid, val_lhs, val_rhs, comm, is_downto} => {
                     println!("  For");
-                   // let res = Self::command_for(&cond, &comm, initialized, &stack, is_downto);
-                    //ret.extend(res);
+                    let res = Self::command_for(&pid, val_lhs, val_rhs, &comm, *is_downto, initialized, &stack);
+                    ret.extend(res);
                 }
                 // TODO
                 Call {call} => println!("Call"),

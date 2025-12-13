@@ -97,13 +97,15 @@ impl Compiler {
                 // TODO; out of bounds exeption
             
                  let index_var = stack.get(var).unwrap(); // TODO: error returning
+                
+
                  //res.extend(Self::handle_variable_atomic(index_var)); 
                 
                  let array_var = stack.get(name).unwrap();
             
-                 res.push(RLOAD {pos: A});
+                // res.push(RLOAD {pos: A}); // rload 
                  //res.push(PUT {pos: H});
-                 res.push(SWP {pos: H}); // H = A
+                // res.push(SWP {pos: H}); // H = A
             
                 match array_var {
                     Variable::Atomic {position} => {
@@ -113,36 +115,30 @@ impl Compiler {
                         
   
                          // TODO: bounds checking
-                        //
-                        //
-                        // laduje do A pozycje czyli set A na pozycje
-                        // biore inny rejestr i wrzucam tam lewą stroną
-                        // odejmuje od pozycji lewa strone
-                        // teraz mamy obliczony ofset w A 
-                        // a chcemy miec pozycje na stacku 
-                        // wiec swap z jeszcze innym rejestrem
-                        // w A ustawiam poczatek arraaya 
-                        // ADD z rejestrem z offetem 
-                        //
-                        // no i checkowanie out of bounds
-                        // jak cos to undefined behaviour
 
                         res.extend(Self::set_reg_a(*lhs)); // A = lhs wartosc 
                         res.push(SWP {pos: F}); // F = A, czyli lhs wartosc 
-                        res.extend(Self::set_reg_a(*position)); // A = position, ale czy tutaj w
-                        // sumie nie powinien byc przypadkiem zmienna index_var? xd
+                        //res.extend(Self::set_reg_a(*index_var)); // A = to po czym indeksujemy
+                       // res.extend(Self::handle_variable_atomic(index_var));
+                        match index_var {
+                            Variable::Array {..} => { // TODO: pozamieniac
+                                println!("problemix");
+                            }
+                            Variable::Atomic {position} => {
+
+                            res.push(LOAD {pos: *position as i64});
+                            }
+                        }
                         res.push(SUB {pos: F}); // A = F - A, czyyyli w A mamy offset!
-                        res.push(SWP {pos: G}); // w G offset 
-                        res.push(SWP {pos: F}); // w A mamy lhs 
-                        //res.push()
-                        
-                        
-                         //let offset: u64 = 0;
-                         //res.extend(Self::set_reg_a(position + offset));
+                        res.push(SWP {pos: F}); // w F offset 
+                        res.extend(Self::set_reg_a(*position));
+                        res.push(ADD {pos: F});
+                      //  res.push(SWP {pos: H});  
+                      //  res.push(RLOAD {pos: A});
                      },
                  }
             
-                res.push(ADD {pos: H});
+                //res.push(ADD {pos: H});
             }
         }
 
@@ -159,6 +155,7 @@ impl Compiler {
     //     return res;
     // }
 
+    // OK
     pub fn handle_variable_array(var: &Variable, value: u64) -> Vec<Instruction> { // array but
         // num-indexed
         let mut res: Vec<Instruction> = vec![];
@@ -169,7 +166,7 @@ impl Compiler {
             },
             Variable::Array {position, lhs, rhs} => {
                 // TODO::
-                if value >= *rhs || value < *lhs {
+                if value > *rhs || value < *lhs {
                    println!("problemix! out od bounds"); // error out of bounds exception 
                 }
                 let offset: u64 = value - lhs; 
@@ -299,9 +296,47 @@ impl Compiler {
         return res;
     }
 
-    // pub fn command_for(cond: &Condition, comm: &Vec<Command>, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>, bool: is_downto) -> Vec<Instruction> {
-    //     let mut res: Vec<Instruction> = vec![];
-    //
-    //     return res;
-    // }
+    // TODO: check na wartosci
+    // TODO: jak w ogole ma dzialac ten for xdddd
+     pub fn command_for(pid: &String, val_lhs: &Value, val_rhs: &Value,  comm: &Vec<Command>, is_downto: bool, initialized: &mut HashSet<String>, stack: & HashMap<String, Variable>) -> Vec<Instruction> {
+         let mut res: Vec<Instruction> = vec![];
+
+        /* musimy jakos zainicjalizowac zmienna */
+
+        
+            
+        // TODO czy zmienna moze byc tablica?
+
+
+
+        /* FOR zmienna FROM wrtosc TO/DOWNTO wartosc DO commands ENDFOR */
+
+        let mut block_instructions: Vec<Instruction> = vec![];
+        block_instructions.extend(Self::handle_commands(comm, initialized, stack));
+
+        // IDEA: dwie sciezki w zaleznosci, czy jest ustawiony is_downto, moze jeden wielki if xd
+        if (is_downto) {
+  // tak naprawde to jest dopoki, doputy lhs > rhs albo lhs >= rhs, no a przy tym up na
+            // odwrot
+            // wiec to troche taki while???
+
+            res.extend(Self::handle_value(val_lhs, stack, initialized));
+            res.push(SWP {pos: B});
+            res.extend(Self::handle_value(val_rhs, stack, initialized));
+            res.push(SUB {pos: B});
+            res.push(JPOS {pos: (block_instructions.len() as i64) + 2, adjust: true});
+
+            /* odjac jeden od wartosci zmiennej */
+
+        } else {
+                      
+            
+
+        }
+
+
+
+    
+         return res;
+    }
 }

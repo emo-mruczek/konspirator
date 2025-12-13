@@ -15,6 +15,7 @@ pub enum Variable {
 impl Compiler {
 
 
+    // OK
      pub fn set_reg_a(position: u64) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![]; 
 

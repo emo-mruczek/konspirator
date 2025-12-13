@@ -56,10 +56,10 @@ pub enum Instruction {
     READ,
     WRITE,
     LOAD {
-        pos: Register, 
+        pos: i64, 
     },
     STORE {
-        pos: Register, 
+        pos: i64, 
     },
     RLOAD {
         pos: Register,
