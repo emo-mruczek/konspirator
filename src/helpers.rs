@@ -62,7 +62,7 @@ impl Compiler {
             Array_Var {name, var} => name,
         };
 
-        return name.clone();
+        return name.name.clone();
     }
 
 }

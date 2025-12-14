@@ -9,6 +9,7 @@ mod expressions;
 mod if_conditions;
 mod while_conditions;
 mod repeat_conditions;
+mod procedures_compiler;
 
 use lalrpop_util::lalrpop_mod;
 use std::{env, io::{self, Write}, fs::{self, File}, process::exit};

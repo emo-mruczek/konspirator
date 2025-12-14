@@ -10,7 +10,7 @@ NUM: Num = {
 };
 
 PID: PID = {
-  <s: r"[_a-z]+"> => s.to_string(),
+  <start: @L> <s: r"[_a-z]+"> <end: @L> => PID {name: s.to_string(), begin: start, end: end},
 };
 
 

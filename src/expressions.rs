@@ -41,7 +41,6 @@ impl Compiler {
 
             },
             Mul {l, r} => {
-// TODO
                 Self::is_initialized(&l, initialized);
                 Self::is_initialized(&r, initialized);
 
@@ -49,7 +48,7 @@ impl Compiler {
                 res.push(SWP {pos: B});
                 res.extend(Self::handle_value(r, stack, initialized));
                 res.push(SWP {pos: C});
-res.extend(Self::handle_value(r, stack, initialized));
+                res.extend(Self::handle_value(r, stack, initialized));
                 res.push(SWP {pos: D});
                 res.extend(Self::construct_multiplication());
 
@@ -145,6 +144,36 @@ res.extend(Self::handle_value(r, stack, initialized));
         // res.push(JUMP {pos: -11, adjust: true});
         // res.push(JUMP {pos: -19, adjust: true});
         // res.push(GET {pos: D});
+       res.push(RST {pos: A}); 
+       res.push(SWP {pos: B});
+
+       res.push(JZERO {pos: 19, adjust: true});
+
+       res.push(SHL {pos: A}); 
+       res.push(SHR {pos: A}); 
+       res.push(SWP {pos: D}); 
+       res.push(SUB {pos: D});
+
+       res.push(JPOS {pos: 5 , adjust: true});
+
+       res.push(ADD {pos: D}); 
+       res.push(SWP {pos: D}); 
+       res.push(SWP {pos: B}); 
+
+       res.push(JUMP {pos: 6, adjust: true }); 
+
+       res.push(ADD {pos: D}); 
+       res.push(SWP {pos: D}); 
+       res.push(INC {pos: A}); 
+       res.push(SWP {pos:B}); 
+       res.push(ADD {pos: C}); 
+       res.push(SHR {pos: C}); 
+       res.push(SHL {pos: D}); 
+       res.push(SHL {pos: B}); 
+
+       res.push(JUMP {pos: -19, adjust: true});
+
+        res.push(SWP {pos: B});
 
         return res;
     } 

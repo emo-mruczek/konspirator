@@ -1,9 +1,16 @@
 
 // TODO:
 
+use std::usize;
+
 pub type Num = u64;
 
-pub type PID = String;
+#[derive(Debug)]
+pub struct PID {
+    pub name: String, 
+    pub begin: usize,
+    pub end: usize
+}
 
 
 // identifier -> pidentifier 
@@ -114,7 +121,6 @@ pub enum Expression {
 
 pub type Args = Vec<PID>;
 
-// TODO:
 // type -> T | I | O | 
 
 #[derive(Debug)]
@@ -125,7 +131,6 @@ pub enum Type {
     Scalar
 }
 
-// TODO:
 // args_decl -> args_decl, type pidentifier
 // args_decl -> type pidentifier
 

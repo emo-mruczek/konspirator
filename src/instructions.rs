@@ -76,12 +76,6 @@ pub enum Instruction {
     SWP {
         pos: Register,
     },
-    // GET {
-    //     pos: Register, 
-    // },
-    // PUT {
-    //     pos: Register, 
-    // },
     RST {
         pos: Register, 
     },
@@ -109,12 +103,6 @@ pub enum Instruction {
         pos: i64, 
         adjust: bool,
     },
-    // STRK {
-    //     pos: Register, 
-    // },
-    // JUMPR {
-    //     pos: Register, 
-    // },
     CALL {
         pos: Register,
     },

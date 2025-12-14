@@ -79,33 +79,26 @@ impl Compiler {
 
         match id {
            Var {name} => {
-                let variable = stack.get(name).unwrap(); // undeclared variable error todo
+                let variable = stack.get(&name.name).unwrap(); // undeclared variable error todo
                 res.extend(Self::handle_variable_atomic(variable));
             }
             Array {name, var} => { // var is a num in this case
-                let variable = stack.get(name).unwrap(); // undeclared variable error todo
+                let variable = stack.get(&name.name).unwrap(); // undeclared variable error todo
                 res.extend(Self::handle_variable_array(variable, *var));
 
             }
            // TODO: !!!!!!!!
             // no i przenieść to do swojej własnej funkcji
             Array_Var {name, var} => {
-                 if !initialized.contains(var) {
+                 if !initialized.contains(&var.name) {
                      panic!("not initialized"); // TODOL error returning
                  }
 
                 // TODO; out of bounds exeption
             
-                 let index_var = stack.get(var).unwrap(); // TODO: error returning
+                 let index_var = stack.get(&var.name).unwrap(); // TODO: error returning
                 
-
-                 //res.extend(Self::handle_variable_atomic(index_var)); 
-                
-                 let array_var = stack.get(name).unwrap();
-            
-                // res.push(RLOAD {pos: A}); // rload 
-                 //res.push(PUT {pos: H});
-                // res.push(SWP {pos: H}); // H = A
+                 let array_var = stack.get(&name.name).unwrap();
             
                 match array_var {
                     Variable::Atomic {position} => {
@@ -118,8 +111,6 @@ impl Compiler {
 
                         res.extend(Self::set_reg_a(*lhs)); // A = lhs wartosc 
                         res.push(SWP {pos: F}); // F = A, czyli lhs wartosc 
-                        //res.extend(Self::set_reg_a(*index_var)); // A = to po czym indeksujemy
-                       // res.extend(Self::handle_variable_atomic(index_var));
                         match index_var {
                             Variable::Array {..} => { // TODO: pozamieniac
                                 println!("problemix");
@@ -133,12 +124,9 @@ impl Compiler {
                         res.push(SWP {pos: F}); // w F offset 
                         res.extend(Self::set_reg_a(*position));
                         res.push(ADD {pos: F});
-                      //  res.push(SWP {pos: H});  
-                      //  res.push(RLOAD {pos: A});
                      },
                  }
             
-                //res.push(ADD {pos: H});
             }
         }
 
@@ -192,16 +180,16 @@ impl Compiler {
         return res;
     }
 
-     pub fn command_if(cond: &Condition, comm: &Vec<Command>, else_comm: &Option<Vec<Command>>, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+     pub fn command_if(cond: &Condition, comm: &Vec<Command>, else_comm: &Option<Vec<Command>>, initialized: &mut HashSet<String>, stack: &mut HashMap<String, Variable>, sp: u64) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
 
         let mut block_instructions: Vec<Instruction> = vec![];
         let mut else_block_instructions: Vec<Instruction> = vec![];
 
-        block_instructions.extend(Self::handle_commands(comm, initialized, stack));
+        block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp));
 
         match else_comm {
-            Some(commands) => else_block_instructions.extend(Self::handle_commands(commands, initialized, stack)),
+            Some(commands) => else_block_instructions.extend(Self::handle_commands(commands, initialized, stack, sp)),
             None => {},
         }
 
@@ -229,11 +217,11 @@ impl Compiler {
         return res;
     }
 
-        pub fn command_while(cond: &Condition, comm: &Vec<Command>, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable> ) -> Vec<Instruction> {
+        pub fn command_while(cond: &Condition, comm: &Vec<Command>, initialized: &mut HashSet<String>, stack: &mut HashMap<String, Variable>, sp: u64 ) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
 
         let mut block_instructions: Vec<Instruction> = vec![];
-        block_instructions.extend(Self::handle_commands(comm, initialized, stack));
+        block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp));
 
         match cond {
             Condition::Equal {l, r} => {
@@ -262,12 +250,12 @@ impl Compiler {
         return res;
     }
     
-    pub fn command_repeat(cond: &Condition, comm: &Vec<Command>, initialized: &mut HashSet<String>, stack: &HashMap<String, Variable>) -> Vec<Instruction> {
+    pub fn command_repeat(cond: &Condition, comm: &Vec<Command>, initialized: &mut HashSet<String>, stack: &mut HashMap<String, Variable>, sp: u64) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
         let mut conditions: Vec<Instruction> = vec![];
 
         let mut block_instructions: Vec<Instruction> = vec![];
-        block_instructions.extend(Self::handle_commands(comm, initialized, stack));
+        block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp));
 
         match cond {
             Condition::Equal {l, r} => {
@@ -297,22 +285,32 @@ impl Compiler {
     }
 
     // TODO: check na wartosci
-    // TODO: jak w ogole ma dzialac ten for xdddd
-     pub fn command_for(pid: &String, val_lhs: &Value, val_rhs: &Value,  comm: &Vec<Command>, is_downto: bool, initialized: &mut HashSet<String>, stack: & HashMap<String, Variable>) -> Vec<Instruction> {
+     pub fn command_for(pid: &String, val_lhs: &Value, val_rhs: &Value,  comm: &Vec<Command>, is_downto: bool, initialized: &mut HashSet<String>, stack: &mut HashMap<String, Variable>, mut sp: u64) -> Vec<Instruction> {
          let mut res: Vec<Instruction> = vec![];
 
         /* musimy jakos zainicjalizowac zmienna */
 
+        stack.insert(pid.clone(), Variable::Atomic {position: sp});
+        sp += 1;
+
+        /* wartosc i to lhs */
+        /* troche jak w assign czy cos */
+
+        // match val_lhs {
+        //     Value::Num { val } => {
+        //
+        //     }
+        //     Value::Var { val: () } => {
+        //
+        //     }
+        // }
+       // res.push(LOAD {pos: val_lhs});
         
-            
-        // TODO czy zmienna moze byc tablica?
-
-
 
         /* FOR zmienna FROM wrtosc TO/DOWNTO wartosc DO commands ENDFOR */
 
         let mut block_instructions: Vec<Instruction> = vec![];
-        block_instructions.extend(Self::handle_commands(comm, initialized, stack));
+        block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp));
 
         // IDEA: dwie sciezki w zaleznosci, czy jest ustawiony is_downto, moze jeden wielki if xd
         if (is_downto) {
@@ -334,7 +332,11 @@ impl Compiler {
 
         }
 
+        res.extend(block_instructions);
 
+        /* clearing the stack */
+        stack.remove(pid);
+        sp -= 1;
 
     
          return res;
