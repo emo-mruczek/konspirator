@@ -295,22 +295,27 @@ impl Compiler {
 
         /* wartosc i to lhs */
         /* troche jak w assign czy cos */
+        /* wiec czemu by nie zrobic assign? */
 
-        // match val_lhs {
-        //     Value::Num { val } => {
-        //
-        //     }
-        //     Value::Var { val: () } => {
-        //
-        //     }
-        // }
-       // res.push(LOAD {pos: val_lhs});
+        //res.push(SWP {pos: G}); // zamiana G z A to chyba ne potrzebne w ogole?
+
+        //res.extend(Self::handle_expression(expression, initialized, stack));
+        // obslugujemy tylko jeden case wiec: 
+        res.extend(Self::handle_value(val_lhs, stack, initialized));
+
+        // res.push(RSTORE {pos: G}); // A = to co bylo w komorce odpowiadajacej temu co jest w get_variable
         
+        initialized.insert(pid.clone()); 
+
+        // TODO: lldb sprawdzic, czy sie ta zmoienna ustawia i ile wynosi czy cos
+
+        // w tym miejscu, zmienna, po ktorej iterujemy, powinna juz byc zainicjalizowana
 
         /* FOR zmienna FROM wrtosc TO/DOWNTO wartosc DO commands ENDFOR */
 
         let mut block_instructions: Vec<Instruction> = vec![];
-        block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp));
+        block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp)); // mamy juz
+        // wrzucone commands 
 
         // IDEA: dwie sciezki w zaleznosci, czy jest ustawiony is_downto, moze jeden wielki if xd
         if (is_downto) {

@@ -111,7 +111,9 @@ impl Compiler {
                     ret.extend(res);
                 }
                 // TODO
-                Call {call} => println!("Call"),
+                Call {call} => {
+                    println!("Call");
+                },
                 Read {name} => {
                     println!("  Read");
                     let res = Self::command_read(&name, initialized, &stack);
