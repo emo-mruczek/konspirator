@@ -315,7 +315,10 @@ impl Compiler {
 
         let mut block_instructions: Vec<Instruction> = vec![];
         block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp)); // mamy juz
-        // wrzucone commands 
+        // wrzucone commands, wartoscia obecna zmiennej, po ktorej iterujemy, zajmuje sie maszyna
+        // wirtualna; my musimy zapewni jumpa odpowiedniego, oraz zmniejszanie zmiennej bądź
+        // zwiekszanie zmiennej o jeden 
+        // jump kiedy odejmowanie jumppos czy cos
 
         // IDEA: dwie sciezki w zaleznosci, czy jest ustawiony is_downto, moze jeden wielki if xd
         if (is_downto) {
@@ -323,7 +326,8 @@ impl Compiler {
             // odwrot
             // wiec to troche taki while???
 
-            res.extend(Self::handle_value(val_lhs, stack, initialized));
+            res.extend(Self::handle_value(val_lhs, stack, initialized)); // zamiast lhs wyciagamy
+            // zmienna, po ktorej iterujemy
             res.push(SWP {pos: B});
             res.extend(Self::handle_value(val_rhs, stack, initialized));
             res.push(SUB {pos: B});
@@ -341,9 +345,9 @@ impl Compiler {
 
         /* clearing the stack */
         stack.remove(pid);
-        sp -= 1;
+        sp -= 1; 
+        initialized.remove(pid);
 
-    
          return res;
     }
 }
