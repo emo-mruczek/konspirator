@@ -1,0 +1,9 @@
+PROGRAM IS
+  a, b
+IN
+  READ a;
+  READ b;
+  FOR i FROM a DOWNTO b DO
+    WRITE i;
+  ENDFOR
+END

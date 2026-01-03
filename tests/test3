@@ -1,0 +1,15 @@
+PROGRAM IS
+a[2:11], b
+IN
+
+  b := 3;
+
+  a[2] := 2;
+  a[b] := 1;
+  a[4] := 4;
+  a[5] := 7;
+
+  WRITE a[2];
+  WRITE a[b];
+
+END

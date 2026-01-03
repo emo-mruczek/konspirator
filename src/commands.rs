@@ -7,6 +7,8 @@ use crate::compiler::Compiler;
 use crate::ast::*;
 use crate::helpers::*;
 use crate::ast::{Identifier::*, *};
+use crate::procedures_compiler::ProcedureCompiler;
+
 
 impl Compiler {
 
@@ -180,16 +182,16 @@ impl Compiler {
         return res;
     }
 
-     pub fn command_if(cond: &Condition, comm: &Vec<Command>, else_comm: &Option<Vec<Command>>, initialized: &mut HashSet<String>, stack: &mut HashMap<String, Variable>, sp: u64) -> Vec<Instruction> {
+     pub fn command_if(cond: &Condition, comm: &Vec<Command>, else_comm: &Option<Vec<Command>>, initialized: &mut HashSet<String>, stack: &mut HashMap<String, Variable>, sp: u64, procedures: &HashMap<String, ProcedureCompiler>) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
 
         let mut block_instructions: Vec<Instruction> = vec![];
         let mut else_block_instructions: Vec<Instruction> = vec![];
 
-        block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp));
+        block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp, procedures));
 
         match else_comm {
-            Some(commands) => else_block_instructions.extend(Self::handle_commands(commands, initialized, stack, sp)),
+            Some(commands) => else_block_instructions.extend(Self::handle_commands(commands, initialized, stack, sp, procedures)),
             None => {},
         }
 
@@ -217,11 +219,11 @@ impl Compiler {
         return res;
     }
 
-        pub fn command_while(cond: &Condition, comm: &Vec<Command>, initialized: &mut HashSet<String>, stack: &mut HashMap<String, Variable>, sp: u64 ) -> Vec<Instruction> {
+        pub fn command_while(cond: &Condition, comm: &Vec<Command>, initialized: &mut HashSet<String>, stack: &mut HashMap<String, Variable>, sp: u64, procedures: &HashMap<String, ProcedureCompiler> ) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
 
         let mut block_instructions: Vec<Instruction> = vec![];
-        block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp));
+        block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp, procedures));
 
         match cond {
             Condition::Equal {l, r} => {
@@ -250,12 +252,12 @@ impl Compiler {
         return res;
     }
     
-    pub fn command_repeat(cond: &Condition, comm: &Vec<Command>, initialized: &mut HashSet<String>, stack: &mut HashMap<String, Variable>, sp: u64) -> Vec<Instruction> {
+    pub fn command_repeat(cond: &Condition, comm: &Vec<Command>, initialized: &mut HashSet<String>, stack: &mut HashMap<String, Variable>, sp: u64, procedures: &HashMap<String, ProcedureCompiler>) -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
         let mut conditions: Vec<Instruction> = vec![];
 
         let mut block_instructions: Vec<Instruction> = vec![];
-        block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp));
+        block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp, procedures));
 
         match cond {
             Condition::Equal {l, r} => {
@@ -285,11 +287,12 @@ impl Compiler {
     }
 
     // TODO: check na wartosci
-     pub fn command_for(pid: &String, val_lhs: &Value, val_rhs: &Value,  comm: &Vec<Command>, is_downto: bool, initialized: &mut HashSet<String>, stack: &mut HashMap<String, Variable>, mut sp: u64) -> Vec<Instruction> {
+     pub fn command_for(pid: &String, val_lhs: &Value, val_rhs: &Value,  comm: &Vec<Command>, is_downto: bool, initialized: &mut HashSet<String>, stack: &mut HashMap<String, Variable>, mut sp: u64, procedures: &HashMap<String, ProcedureCompiler>) -> Vec<Instruction> {
          let mut res: Vec<Instruction> = vec![];
 
         /* musimy jakos zainicjalizowac zmienna */
 
+        // TODO: error ze nie moze to byc array
         stack.insert(pid.clone(), Variable::Atomic {position: sp});
         sp += 1;
 
@@ -314,7 +317,7 @@ impl Compiler {
         /* FOR zmienna FROM wrtosc TO/DOWNTO wartosc DO commands ENDFOR */
 
         let mut block_instructions: Vec<Instruction> = vec![];
-        block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp)); // mamy juz
+        block_instructions.extend(Self::handle_commands(comm, initialized, stack, sp, procedures)); // mamy juz
         // wrzucone commands, wartoscia obecna zmiennej, po ktorej iterujemy, zajmuje sie maszyna
         // wirtualna; my musimy zapewni jumpa odpowiedniego, oraz zmniejszanie zmiennej bądź
         // zwiekszanie zmiennej o jeden 
@@ -350,4 +353,51 @@ impl Compiler {
 
          return res;
     }
+
+ pub fn command_call(call: &ProcCall,  procedures: &HashMap<String, ProcedureCompiler>,initialized: &mut HashSet<String>,  stack: &mut HashMap<String, Variable>, mut sp: u64) -> Vec<Instruction> {
+
+    let mut res: Vec<Instruction> = vec![];
+
+    // TODO: recursive_procedure_call error check there 
+        // check czy procedura istnieje
+        // check na liczbe argumentow
+        // ogólnie checki 
+
+        let procedure_name: String = call.name.name.clone();
+        let procedure_compiler: &ProcedureCompiler = procedures.get(&procedure_name).unwrap();
+        let procedure_declarations: Option<Declarations> = procedure_compiler.get_declarations();
+
+        match procedure_declarations {
+            Some(declarations) => {
+                for variable in declarations {
+                    match variable {
+                           Declaration::Atomic {name} => {
+                            stack.insert(format!("{}@{}", name.name, procedure_name), Variable::Atomic {position: sp});
+
+                            println!("SP: {}", sp);
+                            sp += 1;
+                        }
+                        Declaration::Array {name, num_lhs, num_rhs} => {
+                            stack.insert(format!("{}@{}", name.name, procedure_name), Variable::Array {position: sp, lhs: num_lhs, rhs: num_rhs});
+                            println!("SP: {}", sp);
+                            sp += num_rhs - num_lhs + 1;
+                        }
+                    }
+                }
+            },
+            None => println!("Nothing declared!"),
+        }
+        
+       // println!("{:?}", stack);
+
+
+       res.extend(Self::handle_commands(&procedure_compiler.get_commands(), initialized, stack, sp, procedures));
+        
+    
+    return res
 }
+}
+
+
+
+

@@ -1,0 +1,7 @@
+PROGRAM IS
+    n[19:21], p
+IN
+p := 20;
+  n[p] := 2137;  
+    WRITE n[p];
+END

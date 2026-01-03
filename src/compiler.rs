@@ -35,9 +35,9 @@ impl Compiler {
             Some(procedures) => {
                 for procedure in procedures {
                     self.procedures.insert(procedure.proc_head.name.name.clone(), ProcedureCompiler::new(procedure));
-                    // TODO: printing this shit for a debug purposes, with renamed variables 
+                    println!("   PROCEDURES    \n{:?}", self.procedures);
+                    // TODO: error ze wejscie/wyjscie
                    // handle_procedure
-                   // need for name change etc
                     // TODO:: multiple procedures declaration error
                 }
             }
@@ -74,13 +74,13 @@ impl Compiler {
 
         // compiling the main function
 
-       self.instructions.extend(Self::handle_commands(&self.program.main.commands, &mut self.initialized, &mut self.stack, self.sp));
+       self.instructions.extend(Self::handle_commands(&self.program.main.commands, &mut self.initialized, &mut self.stack, self.sp, &self.procedures));
 
         self.instructions.push(HALT);
         return self.instructions;
     }
 
-    pub fn handle_commands(commands: &Vec<Command>, initialized: & mut HashSet<String>, stack: &mut HashMap<String, Variable>, sp: u64) -> Vec<Instruction> {
+    pub fn handle_commands(commands: &Vec<Command>, initialized: & mut HashSet<String>, stack: &mut HashMap<String, Variable>, sp: u64, procedures: &HashMap<String, ProcedureCompiler> ) -> Vec<Instruction> {
         let mut ret: Vec<Instruction> = vec![];
 
         for command in commands {
@@ -92,28 +92,31 @@ impl Compiler {
                 }
                 If {cond, comm, else_comm} => {
                     println!("  If");
-                    let res = Self::command_if(&cond, &comm, &else_comm, initialized, stack, sp);
+                    let res = Self::command_if(&cond, &comm, &else_comm, initialized, stack, sp, procedures);
                     ret.extend(res);
                 },
                 While {cond, comm} => {
                    println!("  While");
-                   let res = Self::command_while(&cond, &comm, initialized, stack, sp);
+                   let res = Self::command_while(&cond, &comm, initialized, stack, sp, procedures);
                    ret.extend(res);
                 },
                 Repeat {comm, cond} => {
                    println!("  Repeat");
-                   let res = Self::command_repeat(&cond, &comm, initialized, stack, sp);
+                   let res = Self::command_repeat(&cond, &comm, initialized, stack, sp, procedures);
                    ret.extend(res);
                 },
+                // TODO
                 For {pid, val_lhs, val_rhs, comm, is_downto} => {
                     println!("  For");
-                    let res = Self::command_for(&pid.name, val_lhs, val_rhs, &comm, *is_downto, initialized, stack, sp);
+                    let res = Self::command_for(&pid.name, val_lhs, val_rhs, &comm, *is_downto, initialized, stack, sp, procedures);
                     ret.extend(res);
                 }
                 // TODO
                 Call {call} => {
-                    println!("Call");
-                },
+                    println!(" Call");
+                    let res = Self::command_call(call, procedures, initialized, stack, sp);
+                   ret.extend(res);
+                }
                 Read {name} => {
                     println!("  Read");
                     let res = Self::command_read(&name, initialized, &stack);

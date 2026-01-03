@@ -5,7 +5,7 @@ use std::usize;
 
 pub type Num = u64;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PID {
     pub name: String, 
     pub begin: usize,
@@ -17,7 +17,7 @@ pub struct PID {
 // identifier -> pidentifier[pidentifier]
 // identifier -> pidentifier[num]
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Identifier {
     Var {
         name: PID,
@@ -35,7 +35,7 @@ pub enum Identifier {
 // value -> num 
 // value -> identifier 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Value {
     Num {
         val: Num,
@@ -53,7 +53,7 @@ pub enum Value {
 // condition -> value >= value 
 // condition -> value <= value 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Condition {
     Equal {
         l: Value,
@@ -88,7 +88,7 @@ pub enum Condition {
 // expression -> value / value 
 // expression -> value % value 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Expression {
     Val {
         val: Value,
@@ -123,7 +123,7 @@ pub type Args = Vec<PID>;
 
 // type -> T | I | O | 
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Type {
     Array, 
     Const,
@@ -134,7 +134,7 @@ pub enum Type {
 // args_decl -> args_decl, type pidentifier
 // args_decl -> type pidentifier
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ArgDecl {
     pub type_name: Type,
     pub name: PID,
@@ -147,7 +147,7 @@ pub type ArgsDecl = Vec<ArgDecl>;
 // declarations -> pidentifier
 // declarations -> pidentifier[num:num]
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Declaration {
     Atomic {
         name: PID,
@@ -165,7 +165,7 @@ pub type Declarations = Vec<Declaration>;
 
 // proc_call -> pididentifier ( args )
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ProcCall {
     pub name: PID,
     pub args: Args,
@@ -190,7 +190,7 @@ pub struct ProcHead {
 // command -> READ identifier;
 // command -> WRITE value;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Command {
     Assign {
         name: Identifier,

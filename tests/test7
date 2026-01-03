@@ -1,0 +1,15 @@
+PROCEDURE dupa(I a, O b) IS
+c
+IN
+  WRITE a;
+  READ c;
+  b := a + c;
+END
+
+PROGRAM IS
+  b, c
+IN
+  b := 2137;
+  dupa(b, c);
+  WRITE c;
+END

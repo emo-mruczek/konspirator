@@ -2,6 +2,8 @@
 
 use crate::ast::{Command::*,  *};
 use crate::instructions::Instruction::{self, *};
+
+#[derive(Debug, Clone)]
 pub struct ProcedureCompiler {
     name: String,
     declared_arguments: ArgsDecl, //TODO: type check?
@@ -10,7 +12,17 @@ pub struct ProcedureCompiler {
 }
 
 impl ProcedureCompiler {
+    
+    pub fn get_declarations(&self) -> Option<Declarations> {
+        return self.declarations.clone();
+    }
+
+    pub fn get_commands(&self) -> Commands {
+        return self.commands.clone();
+    }
+    
     pub fn new(procedure: Procedure) -> Self {
+        // TODO: czy ja musze renamowac te zmienne z deklaracji?
         let renamed_commands =  Self::rename_commands(&procedure.commands);
         println!(" Renamed tokens: ");
         println!("{:#?}\n", renamed_commands); 

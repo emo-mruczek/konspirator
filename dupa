@@ -1,7 +1,5 @@
 RST a
 SWP g
-READ
-RSTORE g
 RST a
 INC a
 SHL a
@@ -11,33 +9,17 @@ SHL a
 SHL a
 INC a
 SHL a
-INC a
-SHL a
-SHL a
-SHL a
 SHL a
 INC a
 SHL a
 INC a
+SHL a
+SHL a
+SHL a
+INC a
+RSTORE g
+RST a
+INC a
+RLOAD a
 WRITE
-RST a
-SWP g
-RST a
-INC a
-SWP b
-RST a
-RLOAD a
-SUB b
-RSTORE g
-RST a
-RLOAD a
-SWP b
-RST a
-SWP c
-RST a
-SUB b
-JPOS 4
-SWP b
-SUB c
-JPOS 4
 HALT
