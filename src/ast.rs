@@ -1,4 +1,3 @@
-
 // TODO:
 
 use std::usize;
@@ -7,128 +6,79 @@ pub type Num = u64;
 
 #[derive(Debug, Clone)]
 pub struct PID {
-    pub name: String, 
+    pub name: String,
     pub begin: usize,
-    pub end: usize
+    pub end: usize,
 }
 
-
-// identifier -> pidentifier 
+// identifier -> pidentifier
 // identifier -> pidentifier[pidentifier]
 // identifier -> pidentifier[num]
 
 #[derive(Debug, Clone)]
 pub enum Identifier {
-    Var {
-        name: PID,
-    },
-    Array_Var {
-        name: PID,
-        var: PID,
-    },
-    Array {
-        name: PID,
-        var: Num,
-    },
+    Var { name: PID },
+    Array_Var { name: PID, var: PID },
+    Array { name: PID, var: Num },
 }
 
-// value -> num 
-// value -> identifier 
+// value -> num
+// value -> identifier
 
 #[derive(Debug, Clone)]
 pub enum Value {
-    Num {
-        val: Num,
-    },
-    Var {
-        val: Identifier, 
-    },
+    Num { val: Num },
+    Var { val: Identifier },
 }
 
 // condition -> value = value
-// condition -> value != value 
-// condition -> value * value 
-// condition -> value > value 
-// condition -> value < value 
-// condition -> value >= value 
-// condition -> value <= value 
+// condition -> value != value
+// condition -> value * value
+// condition -> value > value
+// condition -> value < value
+// condition -> value >= value
+// condition -> value <= value
 
 #[derive(Debug, Clone)]
 pub enum Condition {
-    Equal {
-        l: Value,
-        r: Value,
-    },
-    NotEqual {
-        l: Value,
-        r: Value,
-    },
-    Greater {
-        l: Value,
-        r: Value,
-    },
-    Less {
-        l: Value,
-        r: Value,
-    },
-    GreaterEqual {
-        l: Value,
-        r: Value,
-    },
-    LessEqual {
-        l: Value,
-        r: Value,
-    },
+    Equal { l: Value, r: Value },
+    NotEqual { l: Value, r: Value },
+    Greater { l: Value, r: Value },
+    Less { l: Value, r: Value },
+    GreaterEqual { l: Value, r: Value },
+    LessEqual { l: Value, r: Value },
 }
 
-// expression -> value 
-// expression -> value + value 
-// expression -> value - value 
-// expression -> value * value 
-// expression -> value / value 
-// expression -> value % value 
+// expression -> value
+// expression -> value + value
+// expression -> value - value
+// expression -> value * value
+// expression -> value / value
+// expression -> value % value
 
 #[derive(Debug, Clone)]
 pub enum Expression {
-    Val {
-        val: Value,
-    },
-    Add {
-        l: Value,
-        r: Value,
-    },
-    Sub {
-        l: Value,
-        r: Value,
-    },
-    Mul {
-        l: Value,
-        r: Value,
-    },
-    Div {
-        l: Value,
-        r: Value,
-    },
-    Mod {
-        l: Value,
-        r: Value,
-    },
+    Val { val: Value },
+    Add { l: Value, r: Value },
+    Sub { l: Value, r: Value },
+    Mul { l: Value, r: Value },
+    Div { l: Value, r: Value },
+    Mod { l: Value, r: Value },
 }
-
 
 // args -> args, pidentifier
 // args -> pidentifier
 
 pub type Args = Vec<PID>;
 
-// type -> T | I | O | 
+// type -> T | I | O |
 
 #[derive(Debug, Clone)]
 pub enum Type {
-    Array, 
+    Array,
     Const,
     Undefined,
-    Scalar
+    Scalar,
 }
 
 // args_decl -> args_decl, type pidentifier
@@ -157,11 +107,10 @@ pub enum Declaration {
         name: PID,
         num_lhs: Num,
         num_rhs: Num,
-    },  
+    },
 }
 
 pub type Declarations = Vec<Declaration>;
-
 
 // proc_call -> pididentifier ( args )
 
@@ -228,8 +177,8 @@ pub enum Command {
     },
 }
 
-// commands -> commands command 
-// commands -> command 
+// commands -> commands command
+// commands -> command
 
 pub type Commands = Vec<Command>;
 
@@ -246,9 +195,8 @@ pub struct Main {
 // procedures -> procedures PROCEDURE proc_head IS IN commands END
 // <empty>
 
-
 #[derive(Debug)]
-pub struct Procedure { 
+pub struct Procedure {
     pub proc_head: ProcHead,
     pub declarations: Option<Declarations>,
     pub commands: Commands,
@@ -258,11 +206,9 @@ pub type Procedures = Vec<Procedure>;
 
 // program_all -> procedures main
 
-// in order to dump everything 
+// in order to dump everything
 #[derive(Debug)]
 pub struct ProgramAll {
     pub procedures: Option<Procedures>,
     pub main: Main,
 }
-
-

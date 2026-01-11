@@ -12,7 +12,7 @@ pub enum CompilingErrorType {
     ArrayTypeVariableAsIndex,
     IncorrectTypeArgument,
     IncorrectNumberOfArguments,
-    VariableNotInitialized
+    VariableNotInitialized,
 }
 
 pub struct CompilerError {
@@ -20,4 +20,3 @@ pub struct CompilerError {
     pub id: String,
     pub pos: usize,
 }
-
