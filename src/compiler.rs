@@ -1,6 +1,7 @@
 /* compiler */
 
 use crate::ast::{Command::*, *};
+use crate::errors::CompilerError;
 use crate::instructions::Instruction::{self, *};
 use std::collections::{HashMap, HashSet};
 use crate::helpers::*;
@@ -27,17 +28,14 @@ impl Compiler {
         }
     }
 
-    pub fn compile(mut self) -> Vec<Instruction> {
-
-        // TODO: procedures handling there before main
-        
+    pub fn compile(mut self) -> Result<Vec<Instruction>, CompilerError> {
+        // TODO 
         match self.program.procedures {
             Some(procedures) => {
                 for procedure in procedures {
                     self.procedures.insert(procedure.proc_head.name.name.clone(), ProcedureCompiler::new(procedure));
                     println!("   PROCEDURES    \n{:?}", self.procedures);
-                    // TODO: error ze wejscie/wyjscie
-                   // handle_procedure
+                    // TODO: error  wejscie/wyjscie
                     // TODO:: multiple procedures declaration error
                 }
             }
@@ -65,7 +63,6 @@ impl Compiler {
                         }
                     }
                 }
-                println!();
             }
             None => {
                 println!("no variable declarations in Main");
@@ -74,62 +71,63 @@ impl Compiler {
 
         // compiling the main function
 
-       self.instructions.extend(Self::handle_commands(&self.program.main.commands, &mut self.initialized, &mut self.stack, self.sp, &self.procedures));
+       self.instructions.extend(Self::handle_commands(&self.program.main.commands, &mut self.initialized, &mut self.stack, self.sp, &self.procedures)?);
 
         self.instructions.push(HALT);
-        return self.instructions;
+
+        return Ok(self.instructions);
     }
 
-    pub fn handle_commands(commands: &Vec<Command>, initialized: & mut HashSet<String>, stack: &mut HashMap<String, Variable>, sp: u64, procedures: &HashMap<String, ProcedureCompiler> ) -> Vec<Instruction> {
+    pub fn handle_commands(commands: &Vec<Command>, initialized: & mut HashSet<String>, stack: &mut HashMap<String, Variable>, sp: u64, procedures: &HashMap<String, ProcedureCompiler> ) -> Result<Vec<Instruction>, CompilerError> {
         let mut ret: Vec<Instruction> = vec![];
 
         for command in commands {
             match command {
                 Assign {name, expr} => {
                     println!("  Assign");
-                    let res = Self::command_assign(&name, &expr, initialized, stack);
+                    let res = Self::command_assign(&name, &expr, initialized, stack)?;
                     ret.extend(res);
                 }
                 If {cond, comm, else_comm} => {
                     println!("  If");
-                    let res = Self::command_if(&cond, &comm, &else_comm, initialized, stack, sp, procedures);
+                    let res = Self::command_if(&cond, &comm, &else_comm, initialized, stack, sp, procedures)?;
                     ret.extend(res);
                 },
                 While {cond, comm} => {
                    println!("  While");
-                   let res = Self::command_while(&cond, &comm, initialized, stack, sp, procedures);
+                   let res = Self::command_while(&cond, &comm, initialized, stack, sp, procedures)?;
                    ret.extend(res);
                 },
                 Repeat {comm, cond} => {
                    println!("  Repeat");
-                   let res = Self::command_repeat(&cond, &comm, initialized, stack, sp, procedures);
+                   let res = Self::command_repeat(&cond, &comm, initialized, stack, sp, procedures)?;
                    ret.extend(res);
                 },
                 // TODO
                 For {pid, val_lhs, val_rhs, comm, is_downto} => {
                     println!("  For");
-                    let res = Self::command_for(&pid.name, val_lhs, val_rhs, &comm, *is_downto, initialized, stack, sp, procedures);
+                    let res = Self::command_for(&pid.name, val_lhs, val_rhs, &comm, *is_downto, initialized, stack, sp, procedures)?;
                     ret.extend(res);
                 }
                 // TODO
                 Call {call} => {
                     println!(" Call");
-                    let res = Self::command_call(call, procedures, initialized, stack, sp);
+                    let res = Self::command_call(call, procedures, initialized, stack, sp)?;
                    ret.extend(res);
                 }
                 Read {name} => {
                     println!("  Read");
-                    let res = Self::command_read(&name, initialized, &stack);
+                    let res = Self::command_read(&name, initialized, &stack)?;
                     ret.extend(res);
                 }
                 Write {val} => {
                     println!("  Write");
-                    let res = Self::command_write(val, stack, initialized);
+                    let res = Self::command_write(val, stack, initialized)?;
                     ret.extend(res);
                 }
             }
         }
 
-        return ret;
+        return Ok(ret);
     }
 }

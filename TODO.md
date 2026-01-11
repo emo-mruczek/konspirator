@@ -5,7 +5,7 @@
 
 ### Do dodania
 
-- procedury
+- procedury -> renaming, command_call, co z rodzajami argumentów 
 - obsługa błędów
 
 ### Wszystkie komentarze przejrzeć i TODO

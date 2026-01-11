@@ -2,6 +2,7 @@
 
 // TODO: tests
 
+use crate::errors::CompilerError;
 use crate::instructions::Instruction::{self, *};
 use crate::instructions::Register::*;
 use std::collections::HashMap;
@@ -12,14 +13,14 @@ use crate::helpers::Variable;
 
 impl Compiler {
 
-    pub fn repeat_handle_equal(l: &Value, r: &Value, stack: &HashMap<String, Variable>, block_instructions: &Vec<Instruction>, initialized: &mut HashSet<String> ) -> Vec<Instruction> {
+    pub fn repeat_handle_equal(l: &Value, r: &Value, stack: &HashMap<String, Variable>, block_instructions: &Vec<Instruction>, initialized: &mut HashSet<String> ) -> Result<Vec<Instruction>, CompilerError> {
         let mut res: Vec<Instruction> = vec![];
 
-        res.extend(Self::handle_value(l, stack, initialized));
+        res.extend(Self::handle_value(l, stack, initialized)?);
         res.push(SWP {pos: B});
-        res.extend(Self::handle_value(r, stack, initialized));
+        res.extend(Self::handle_value(r, stack, initialized)?);
         res.push(SWP {pos: C});
-        res.extend(Self::handle_value(r, stack, initialized));
+        res.extend(Self::handle_value(r, stack, initialized)?);
         res.push(SUB {pos: B});
 
         let len = res.len();
@@ -31,17 +32,17 @@ impl Compiler {
 
         res.push(JPOS {pos: -(((block_instructions.len() + len) as i64) + 3), adjust: true});
 
-        return res;
+        return Ok(res);
     } 
 
-    pub fn repeat_handle_notequal(l: &Value, r: &Value, stack: &HashMap<String, Variable>, block_instructions: &Vec<Instruction> , initialized: &mut HashSet<String>) -> Vec<Instruction> {
+    pub fn repeat_handle_notequal(l: &Value, r: &Value, stack: &HashMap<String, Variable>, block_instructions: &Vec<Instruction> , initialized: &mut HashSet<String>) -> Result<Vec<Instruction>, CompilerError> {
         let mut res: Vec<Instruction> = vec![];
 
-        res.extend(Self::handle_value(l, stack, initialized));
+        res.extend(Self::handle_value(l, stack, initialized)?);
         res.push(SWP {pos: B});
-        res.extend(Self::handle_value(r, stack, initialized));
+        res.extend(Self::handle_value(r, stack, initialized)?);
         res.push(SWP {pos: C});
-        res.extend(Self::handle_value(r, stack, initialized));
+        res.extend(Self::handle_value(r, stack, initialized)?);
         res.push(SUB {pos: B});
 
         let len = res.len();
@@ -54,15 +55,15 @@ impl Compiler {
 
         res.push(JUMP {pos: -((block_instructions.len() + len) as i64), adjust: true});
 
-        return res;
+        return Ok(res);
     }
     
-    pub fn repeat_handle_greater(l: &Value, r: &Value, stack: &HashMap<String, Variable>, block_instructions: &Vec<Instruction> , initialized: &mut HashSet<String>) -> Vec<Instruction> {
+    pub fn repeat_handle_greater(l: &Value, r: &Value, stack: &HashMap<String, Variable>, block_instructions: &Vec<Instruction> , initialized: &mut HashSet<String>) -> Result<Vec<Instruction>, CompilerError> {
         let mut res: Vec<Instruction> = vec![];
 
-        res.extend(Self::handle_value(r, stack, initialized));
+        res.extend(Self::handle_value(r, stack, initialized)?);
         res.push(SWP {pos: B});
-        res.extend(Self::handle_value(l, stack, initialized));
+        res.extend(Self::handle_value(l, stack, initialized)?);
         res.push(SUB {pos: B});
 
         res.push(JPOS {pos: 2, adjust: true});
@@ -71,15 +72,15 @@ impl Compiler {
 
         res.push(JUMP {pos: -((block_instructions.len() + len) as i64), adjust: true});
 
-        return res;
+        return Ok(res);
     }
 
-    pub fn repeat_handle_less(l: &Value, r: &Value, stack: &HashMap<String, Variable>, block_instructions: &Vec<Instruction> , initialized: &mut HashSet<String>) -> Vec<Instruction> {
+    pub fn repeat_handle_less(l: &Value, r: &Value, stack: &HashMap<String, Variable>, block_instructions: &Vec<Instruction> , initialized: &mut HashSet<String>) ->Result<Vec<Instruction>, CompilerError> {
         let mut res: Vec<Instruction> = vec![];
 
-        res.extend(Self::handle_value(l, stack, initialized));
+        res.extend(Self::handle_value(l, stack, initialized)?);
         res.push(SWP {pos: B});
-        res.extend(Self::handle_value(r, stack, initialized));
+        res.extend(Self::handle_value(r, stack, initialized)?);
         res.push(SUB {pos: B});
 
         res.push(JPOS {pos: 2, adjust: true});
@@ -88,36 +89,36 @@ impl Compiler {
 
         res.push(JUMP {pos: -((block_instructions.len() + len) as i64), adjust: true});
 
-        return res;
+        return Ok(res);
     }
 
-    pub fn repeat_handle_greaterequal(l: &Value, r: &Value, stack: &HashMap<String, Variable>, block_instructions: &Vec<Instruction> , initialized: &mut HashSet<String>) -> Vec<Instruction> {
+    pub fn repeat_handle_greaterequal(l: &Value, r: &Value, stack: &HashMap<String, Variable>, block_instructions: &Vec<Instruction> , initialized: &mut HashSet<String>) ->Result<Vec<Instruction>, CompilerError> {
         let mut res: Vec<Instruction> = vec![];
 
-        res.extend(Self::handle_value(l, stack, initialized));
+        res.extend(Self::handle_value(l, stack, initialized)?);
         res.push(SWP {pos: B});
-        res.extend(Self::handle_value(r, stack, initialized));
+        res.extend(Self::handle_value(r, stack, initialized)?);
         res.push(SUB {pos: B});
 
         let len = res.len();
 
         res.push(JPOS {pos: -((block_instructions.len() + len) as i64), adjust: true});
 
-        return res;
+        return Ok(res);
     }
 
-    pub fn repeat_handle_lessequal(l: &Value, r: &Value, stack: &HashMap<String, Variable>, block_instructions: &Vec<Instruction> , initialized: &mut HashSet<String>) -> Vec<Instruction> {
+    pub fn repeat_handle_lessequal(l: &Value, r: &Value, stack: &HashMap<String, Variable>, block_instructions: &Vec<Instruction> , initialized: &mut HashSet<String>) ->Result<Vec<Instruction>, CompilerError> {
         let mut res: Vec<Instruction> = vec![];
 
-        res.extend(Self::handle_value(r, stack, initialized));
+        res.extend(Self::handle_value(r, stack, initialized)?);
         res.push(SWP {pos: B});
-        res.extend(Self::handle_value(l, stack, initialized));
+        res.extend(Self::handle_value(l, stack, initialized)?);
         res.push(SUB {pos: B});
 
         let len = res.len();
 
         res.push(JPOS {pos: -((block_instructions.len() + len) as i64), adjust: true});
 
-        return res;
+        return Ok(res);
     }
 }

@@ -1,5 +1,3 @@
-// procedury na koncu, nie mam pojecia, jak do nich podejsc nawet ;-; i wanna cry
-
 mod ast;
 mod instructions;
 mod compiler;
@@ -10,10 +8,12 @@ mod if_conditions;
 mod while_conditions;
 mod repeat_conditions;
 mod procedures_compiler;
+mod errors; 
 
 use lalrpop_util::lalrpop_mod;
-use std::{env, io::{self, Write}, fs::{self, File}, process::exit};
-use crate::{compiler::Compiler, instructions::Instruction::{self, *}};
+use std::{env, fs::{self, File}, io::{self, BufRead, Write}, process::exit};
+use crate::{compiler::Compiler, errors::CompilerError, errors::CompilingErrorType::*,  instructions::Instruction::{self, *}};
+use std::io::{BufReader};
 
 
 lalrpop_mod!(parser);
@@ -45,18 +45,23 @@ fn main() -> io::Result<()> {
     let program = parser::PROGRAMALLParser::new().parse(&input_code);
 
 
-    // whole as(s)t dump
     println!(" Successfully parsed\n");
     println!("{:#?}\n", program); 
 
     let mut instructions: Vec<Instruction> = vec![];
 
     match program {
-        Ok(p) => { //_ for now, in order to not move the program
+        Ok(p) => {
             let compiler: Compiler = Compiler::new(p);
-            instructions = compiler.compile();
+            
+            let instructions_result: Result<Vec<Instruction>, CompilerError> = compiler.compile();
+
+            match instructions_result {
+                Ok(result) => instructions = result,
+                Err(error) => handle_error(error, in_name),
+            }
         },
-        Err(e) => panic!("Something's wrong! {e:}"), // TODO: for now
+        Err(e) => panic!("Syntax error: {e:}")
     };
 
     /* needed to recheck the instructions in order to set the jump positions */
@@ -81,14 +86,84 @@ fn main() -> io::Result<()> {
         println!("{}", instruction); 
     }
 
-    // https://stackoverflow.com/questions/63713887/how-to-write-string-to-file
-    let mut output_code = File::create(out_name)?;
+    let mut output_file = File::create(out_name).expect("Error while creating a file");
 
     for instruction in instructions.iter() {
-        write!(output_code, "{}\n", instruction)?;
+        write!(output_file, "{}\n", instruction).expect("Error while writting a file");
     }
+    
 
     return Ok(());
+}
+
+fn handle_error(error: CompilerError, input: &String) {
+
+    let line = find_line(input, error.pos).expect("Unable to get position");
+
+    match error.error_type {
+        UndeclaredVariable => {
+            let id: String = error.id.split('@').next().expect("Error while splitting").to_string();
+            panic!("Error: UndeclaredVariable {} on line {}", id, line);
+        }
+        MultipleVariableDeclarations => {
+            let id: String = error.id.split('@').next().expect("Error while splitting").to_string();
+            panic!("Error: MultipleVariableDeclarations {} on line {}", id, line);
+        }
+        UndeclaredProcedure => {
+            panic!("Error: UndeclaredProcedure {} on line {}", error.id, line);
+        }
+        MultipleProcedureDeclaration => {
+                  panic!("Error: MultipleProcedureDeclaration {} on line {}", error.id, line);
+            }
+        RecursiveProcedureCall => {
+        panic!("Error: RecursiveProcedureCall {} on line {}", error.id, line);
+            }
+        IndexOutOfBounds => {
+                  let id: String = error.id.split('@').next().expect("Error while splitting").to_string();
+                panic!("Error: IndexOutOfBounds {} on line {}", id, line);
+            }
+        ArrayTypeVariableAsIndex => {
+          let id: String = error.id.split('@').next().expect("Error while splitting").to_string();
+                panic!("Error: ArrayTypeVariableAsIndex {} on line {}", id, line);
+            }
+        IncorrectTypeArgument => {
+                let id: String = error.id.split('@').next().expect("Error while splitting").to_string();
+                panic!("Error: ArrayTypeVariableAsIndex {} on line {}", id, line);
+            }
+        IncorrectNumberOfArguments => {
+        panic!("Error: RecursiveProcedureCall {} on line {}", error.id, line);
+            }
+        IncorrectUseOfVariable => {
+            let id: String = error.id.split('@').next().expect("Error while splitting").to_string();
+                panic!("Error: IncorrectUseOfVariable {} on line {}", id, line);
+        }
+,
+        VariableNotInitialized => {
+            let id: String = error.id.split('@').next().expect("Error while splitting").to_string();
+                panic!("Error: VariableNotInitialized {} on line {}", id, line);
+
+        },
+    };
+}
+
+
+
+// TODO:
+ fn find_line(input: &String, bytes: usize) -> Option<usize> {
+    let file = File::open(input).expect("Error while opening a file");
+    let reader = BufReader::new(file);
+
+    
+    let mut total_bytes = 0;
+    for (i, line) in reader.lines().enumerate() {
+        let line = line.unwrap();
+        total_bytes += line.len() + 1; // +1 for the '\n' character
+        if total_bytes >= bytes {
+            return Some(i + 1); // +1 because line numbers start from 1
+        }
+    }
+    
+    return None; // return None if bytes is greater than the total number of bytes
 }
 
 

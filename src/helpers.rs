@@ -1,6 +1,9 @@
+/* errors DONE */
 /* helper functions */
 
+
 use crate::ast::{Identifier::*, *};
+use crate::errors::{CompilerError, CompilingErrorType::{self, *}};
 use crate::instructions::Instruction::{self, *};
 use crate::instructions::Register::*;
 use std::collections::{HashMap, HashSet};
@@ -44,15 +47,18 @@ impl Compiler {
         return res;
     }
 
-    pub fn is_initialized(val: &Value, initialized: &mut HashSet<String>) {
+    pub fn is_initialized(val: &Value, initialized: &mut HashSet<String>) -> Result<bool, CompilerError> {
         match val {
             Value::Num {val} => {},
             Value::Var {val} => {
-                if !initialized.contains(&Self::get_name(val)) {
-                    panic!("not initialized"); // TODO: handling
+                let var_name = &Self::get_name(val);
+                if !initialized.contains(var_name) {
+                    return Err(CompilerError{error_type: VariableNotInitialized, id: var_name.clone(), pos: 0 }); // TODO: ?
                 }
             }
         }
+
+        return Ok(true);
     }
 
     pub fn get_name(id: &Identifier) -> String {
