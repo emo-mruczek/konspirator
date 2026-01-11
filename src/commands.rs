@@ -360,39 +360,60 @@ impl Compiler {
 
  pub fn command_call(call: &ProcCall,  procedures: &HashMap<String, ProcedureCompiler>,initialized: &mut HashSet<String>,  stack: &mut HashMap<String, Variable>, mut sp: u64) -> Result<Vec<Instruction>, CompilerError>  {
 
-    let mut res: Vec<Instruction> = vec![];
+        let mut res: Vec<Instruction> = vec![];
 
-    // TODO: recursive_procedure_call error check there 
-        // check czy procedura istnieje
-        // check na liczbe argumentow
-        // ogólnie checki 
+        // zapamietywanie rodzaju parametrów funkcji
+        // I nie może być modyfikowany
+        // O jest przyjmowany niezainicjalizowany
+        // T to tablica
 
-//         let procedure_name: String = call.name.name.clone();
-//         let procedure_compiler: &ProcedureCompiler = procedures.get(&procedure_name).unwrap();
-//         let procedure_declarations: Option<Declarations> = procedure_compiler.get_declarations();
-//         let call_arguments: Args = call.args.clone();
-//         let procedure_arguments: ArgsDecl = procedure_compiler.get_declared_arguments();
-//
-//         match procedure_declarations {
-//             Some(&declarations) => {
-//                 for variable in declarations {
-//                     match variable {
-//                            Declaration::Atomic {name} => {
-//                             stack.insert(format!("{}@{}", name.name, procedure_name), Variable::Atomic {position: sp});
-//
-//                             println!("SP: {}", sp);
-//                             sp += 1;
-//                         }
-//                         Declaration::Array {name, num_lhs, num_rhs} => {
-//                             stack.insert(format!("{}@{}", name.name, procedure_name), Variable::Array {position: sp, lhs: num_lhs, rhs: num_rhs});
-//                             println!("SP: {}", sp);
-//                             sp += num_rhs - num_lhs + 1;
-//                         }
-//                     }
-//                 }
-//             },
-//             None => println!("Nothing declared!"),
-//         }
+         let procedure_name: String = call.name.name.clone();
+         let procedure_compiler_result = procedures.get(&procedure_name);
+        let procedure_compiler: &ProcedureCompiler;
+        match procedure_compiler_result {
+            Some(pc) => procedure_compiler = pc,
+            None => return Err(CompilerError { error_type: UndeclaredProcedure, id: procedure_name, pos: call.name.begin}),
+        }
+
+
+         let procedure_declarations: Option<Declarations> = procedure_compiler.get_declarations();
+         let call_arguments: Args = call.args.clone();
+         let procedure_arguments: ArgsDecl = procedure_compiler.get_declared_arguments();
+
+        if procedure_arguments.len() != call_arguments.len() {
+            return Err(CompilerError { error_type: IncorrectNumberOfArguments, id: procedure_name, pos: call.name.begin })  
+        }
+
+
+        for arg in call_arguments {
+            let arg_name: String = arg.name;
+            let proc_arg_name: String = format!("@{}", procedure_name);
+
+            if arg_name.contains(&proc_arg_name) {
+                return Err(CompilerError { error_type: RecursiveProcedureCall, id: procedure_name, pos: call.name.begin }); 
+            }
+        }
+
+         match procedure_declarations {
+             Some(declarations) => {
+                 for variable in declarations {
+                     match variable {
+                            Declaration::Atomic {name} => {
+                             stack.insert(format!("{}@{}", name.name, procedure_name), Variable::Atomic {position: sp});
+
+                             println!("SP: {}", sp);
+                             sp += 1;
+                         }
+                         Declaration::Array {name, num_lhs, num_rhs} => {
+                             stack.insert(format!("{}@{}", name.name, procedure_name), Variable::Array {position: sp, lhs: num_lhs, rhs: num_rhs});
+                             println!("SP: {}", sp);
+                             sp += num_rhs - num_lhs + 1;
+                        }
+                     }
+                }
+             },
+             None => println!("Nothing declared!")
+         }
 //
 //         // iterujemy po argumentach wywołania oraz argumentach z procedury
 //         for (argument, declared_argument) in call_arguments.iter().zip(procedure_arguments) {
@@ -458,9 +479,9 @@ impl Compiler {
 //         }
 //
 //
-//        res.extend(Self::handle_commands(&procedure_compiler.get_commands(), initialized, stack, sp, procedures)?);
-//
-//
+        res.extend(Self::handle_commands(&procedure_compiler.get_commands(), initialized, stack, sp, procedures)?);
+
+
     return Ok(res);
 }
 }
