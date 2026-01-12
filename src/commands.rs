@@ -519,6 +519,19 @@ impl Compiler {
         return Ok(res);
     }
 
+
+//        mov ecx, 1           ; i := 1
+// loop1:
+//     cmp ecx, 3           ; i <= 3
+//     jg loop1_end
+//     push ecx
+//     push fmt
+//     call printf
+//     add esp, 8
+//     inc ecx              ; i = i + 1
+//     jmp loop1
+// loop1_end:
+
     // TODO: check na wartosci
     pub fn command_for(
         pid: &String,
@@ -543,21 +556,27 @@ impl Compiler {
         /* troche jak w assign czy cos */
         /* wiec czemu by nie zrobic assign? */
 
-        //res.push(SWP {pos: G}); // zamiana G z A to chyba ne potrzebne w ogole?
 
-        //res.extend(Self::handle_expression(expression, initialized, stack));
         // obslugujemy tylko jeden case wiec:
-        res.extend(Self::handle_value(val_lhs, stack, initialized)?);
-
-        // res.push(RSTORE {pos: G}); // A = to co bylo w komorce odpowiadajacej temu co jest w get_variable
+        res.extend(Self::handle_value(val_lhs, stack, initialized)?); // A == poczatkowa wartosc,
+        // po ktorej iterujemy  
+        // res.push(Instruction::STORE{pos: stack[pid].}); // czy to w ogole ma sens? wyciagamy
+        // position, bedzie trzeba pewnie matcha czy cos
 
         initialized.insert(pid.clone());
+
+
 
         // TODO: lldb sprawdzic, czy sie ta zmoienna ustawia i ile wynosi czy cos
 
         // w tym miejscu, zmienna, po ktorej iterujemy, powinna juz byc zainicjalizowana
 
-        /* FOR zmienna FROM wrtosc TO/DOWNTO wartosc DO commands ENDFOR */
+        // nastepnie musze koncową wartosc gdzies wrzucic do innej komorki
+        
+        res.extend(Self::handle_value(val_rhs, stack, initialized)?);
+        res.push(Instruction::SWP{pos: E});
+
+        let block_instructions_begin = res.len();
 
         let mut block_instructions: Vec<Instruction> = vec![];
         block_instructions.extend(Self::handle_commands(
@@ -566,33 +585,12 @@ impl Compiler {
             stack,
             sp,
             procedures,
-        )?); // mamy juz
-        // wrzucone commands, wartoscia obecna zmiennej, po ktorej iterujemy, zajmuje sie maszyna
-        // wirtualna; my musimy zapewni jumpa odpowiedniego, oraz zmniejszanie zmiennej bądź
-        // zwiekszanie zmiennej o jeden
-        // jump kiedy odejmowanie jumppos czy cos
-
-        // IDEA: dwie sciezki w zaleznosci, czy jest ustawiony is_downto, moze jeden wielki if xd
-        if (is_downto) {
-            // tak naprawde to jest dopoki, doputy lhs > rhs albo lhs >= rhs, no a przy tym up na
-            // odwrot
-            // wiec to troche taki while???
-
-            res.extend(Self::handle_value(val_lhs, stack, initialized)?); // zamiast lhs wyciagamy
-            // zmienna, po ktorej iterujemy
-            res.push(SWP { pos: B });
-            res.extend(Self::handle_value(val_rhs, stack, initialized)?);
-            res.push(SUB { pos: B });
-            res.push(JPOS {
-                pos: (block_instructions.len() as i64) + 2,
-                adjust: true,
-            });
-
-            /* odjac jeden od wartosci zmiennej */
-        } else {
-        }
+        )?); 
+        let mut block_instructions_len = block_instructions.len();
 
         res.extend(block_instructions);
+
+        res.push(Instruction::JUMP{pos: (res.len() - block_instructions_len) as i64, adjust: true});
 
         /* clearing the stack */
         stack.remove(pid);
