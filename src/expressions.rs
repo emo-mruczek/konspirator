@@ -16,6 +16,7 @@ impl Compiler {
     ) -> Result<Vec<Instruction>, CompilerError> {
         let mut res: Vec<Instruction> = vec![];
 
+        // TODO: zamienic z rst i add
         match expression {
             Val { val } => {
                 Self::is_initialized(&val, initialized)?;
@@ -131,48 +132,72 @@ impl Compiler {
     // TODO:
     pub fn construct_division() -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
-        res.push(RST { pos: A });
-        res.push(SWP { pos: B });
+        // W B dzielna w C dzielnik
 
-        res.push(JZERO {
-            pos: 19,
-            adjust: true,
-        });
+        // G
+        // ustawiamy A
+        // zmieniamy z G 
+        // zerujemy A 
+        // dodajemy G do A
+       
+        
+        res.push(RST {pos: D});
+        res.push(RST {pos: A});
+        res.push(ADD {pos: C});
 
-        res.push(SHL { pos: A });
-        res.push(SHR { pos: A });
-        res.push(SWP { pos: D });
-        res.push(SUB { pos: D });
+        res.push(JZERO {pos: 27, adjust: true});
 
-        res.push(JPOS {
-            pos: 5,
-            adjust: true,
-        });
+        //res.push(GET {pos: C});
+        res.push(RST {pos: A});
+        res.push(ADD {pos: C});
 
-        res.push(ADD { pos: D });
-        res.push(SWP { pos: D });
-        res.push(SWP { pos: B });
+        res.push(SUB {pos: B});
+        res.push(JPOS {pos: 23, adjust: true});
 
-        res.push(JUMP {
-            pos: 6,
-            adjust: true,
-        });
+        //res.push(GET {pos: C});
+        res.push(RST {pos: A});
+        res.push(ADD {pos: C});
 
-        res.push(ADD { pos: D });
-        res.push(SWP { pos: D });
-        res.push(INC { pos: A });
-        res.push(SWP { pos: B });
-        res.push(ADD { pos: C });
-        res.push(SHR { pos: C });
-        res.push(SHL { pos: D });
-        res.push(SHL { pos: B });
+        //res.push(PUT {pos: E});
+        res.push(SWP { pos: E });
 
-        res.push(JUMP {
-            pos: -19,
-            adjust: true,
-        });
+        res.push(RST {pos: F});
+        res.push(INC {pos: F});
 
-        res.push(SWP { pos: B });
+        //res.push(GET {pos: E});
+        res.push(RST {pos: A});
+        res.push(ADD {pos: E});
+
+        res.push(SUB {pos: B});
+        res.push(JPOS {pos: 13, adjust: true});
+
+       // res.push(GET {pos: B});
+        res.push(RST {pos: A});
+        res.push(ADD {pos: B});
+
+        res.push(SUB {pos: E});
+
+        //res.push(PUT {pos: B});
+        res.push(SWP {pos: B});
+
+       // res.push(GET {pos: D});
+        res.push(RST {pos: A});
+        res.push(ADD {pos: D});
+
+
+        res.push(ADD {pos: F});
+
+       // res.push(PUT {pos: D});
+        res.push(SWP {pos: D});
+
+        res.push(SHL {pos: E});
+        res.push(SHL {pos: F});
+        res.push(JUMP {pos: -13, adjust: true});
+        res.push(JUMP {pos: -23, adjust: true});
+
+        //res.push(GET {pos: D});
+        res.push(RST {pos: A});
+        res.push(ADD {pos: D});
 
         return res;
     }

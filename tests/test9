@@ -1,0 +1,8 @@
+PROGRAM IS
+  n, p, z
+IN
+  READ n;
+  READ p;
+  z := n / p;
+  WRITE z;
+END
