@@ -1,5 +1,5 @@
 // TODO:
-
+#![allow(non_camel_case_types)]
 use std::usize;
 
 pub type Num = u64;

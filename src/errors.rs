@@ -13,6 +13,7 @@ pub enum CompilingErrorType {
     IncorrectTypeArgument,
     IncorrectNumberOfArguments,
     VariableNotInitialized,
+    LoopIndexAssignment,
 }
 
 pub struct CompilerError {

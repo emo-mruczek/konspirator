@@ -1,0 +1,10 @@
+PROGRAM IS
+  n, p
+IN
+  READ n;
+  READ p;
+  FOR i FROM n DOWNTO p DO
+    WRITE i;
+    i := 32132;
+  ENDFOR
+END
