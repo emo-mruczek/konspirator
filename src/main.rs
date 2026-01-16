@@ -193,7 +193,7 @@ fn handle_error(error: CompilerError, input: &String) {
                 .to_string();
             panic!("Error: VariableNotInitialized {} on line {}", id, line);
         }
- LoopIndexAssignment => {
+        LoopIndexAssignment => {
             let id: String = error
                 .id
                 .split('@')

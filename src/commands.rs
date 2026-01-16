@@ -519,101 +519,112 @@ impl Compiler {
         return Ok(res);
     }
 
-
- 
     pub fn check_for_assignment(pid_for: &String, commands: &Vec<Command>) -> Option<usize> {
-
         for command in commands {
             match command {
-                Command::Assign { name, expr } => {
-                  match name {
+                Command::Assign { name, expr } => match name {
                     Var { name } => {
-                            if name.name == *pid_for {
-                               return Some(name.begin) ;
-                            }
+                        if name.name == *pid_for {
+                            return Some(name.begin);
                         }
+                    }
                     Array_Var { name, var } => {
-                            if name.name == *pid_for {
-                                return Some(name.begin);
-                            }
-                        },
-                    Array { name, var } => {
-                            if name.name == *pid_for {
-                                return Some(name.begin);
-                            }
+                        if name.name == *pid_for {
+                            return Some(name.begin);
                         }
-                } 
+                    }
+                    Array { name, var } => {
+                        if name.name == *pid_for {
+                            return Some(name.begin);
+                        }
+                    }
                 },
-                Command::If { cond, comm, else_comm } => {
-                    let temp = Self::check_for_assignment(pid_for, comm); 
+                Command::If {
+                    cond,
+                    comm,
+                    else_comm,
+                } => {
+                    let temp = Self::check_for_assignment(pid_for, comm);
                     match temp {
-                        Some(result) =>{ return Some(result);}
-                        None => {},
+                        Some(result) => {
+                            return Some(result);
+                        }
+                        None => {}
                     }
 
                     if else_comm.is_some() {
-                      let temp_else = Self::check_for_assignment(pid_for, comm); 
-                    match temp_else {
-                        Some(result) =>{ return Some(result);}
-                        None => todo!(),
+                        let temp_else = Self::check_for_assignment(pid_for, comm);
+                        match temp_else {
+                            Some(result) => {
+                                return Some(result);
+                            }
+                            None => todo!(),
+                        }
                     }
-                    }
-                },
+                }
                 Command::While { cond, comm } => {
-let temp = Self::check_for_assignment(pid_for, comm); 
+                    let temp = Self::check_for_assignment(pid_for, comm);
                     match temp {
-                        Some(result) =>{ return Some(result);}
-                        None => {},
+                        Some(result) => {
+                            return Some(result);
+                        }
+                        None => {}
                     }
-                },
+                }
                 Command::Repeat { comm, cond } => {
-let temp = Self::check_for_assignment(pid_for, comm); 
+                    let temp = Self::check_for_assignment(pid_for, comm);
                     match temp {
-                        Some(result) =>{ return Some(result);}
-                        None => {},
+                        Some(result) => {
+                            return Some(result);
+                        }
+                        None => {}
                     }
-                },
-                Command::For { pid, val_lhs, val_rhs, comm, is_downto } => {
-let temp = Self::check_for_assignment(pid_for, comm); 
+                }
+                Command::For {
+                    pid,
+                    val_lhs,
+                    val_rhs,
+                    comm,
+                    is_downto,
+                } => {
+                    let temp = Self::check_for_assignment(pid_for, comm);
                     match temp {
-                        Some(result) =>{ return Some(result);}
-                        None => {},
+                        Some(result) => {
+                            return Some(result);
+                        }
+                        None => {}
                     }
-if pid.name == *pid_for {
+                    if pid.name == *pid_for {
                         return Some(pid.begin);
                     }
-                },
+                }
                 Command::Call { call } => todo!(), // TODO:
-                Command::Read { name } => { 
-                   match name {
+                Command::Read { name } => match name {
                     Var { name } => {
-                            if name.name == *pid_for {
-                               return Some(name.begin) ;
-                            }
+                        if name.name == *pid_for {
+                            return Some(name.begin);
                         }
+                    }
                     Array_Var { name, var } => {
-                            if name.name == *pid_for {
-                                return Some(name.begin);
-                            }
-                        },
-                    Array { name, var } => {
-                            if name.name == *pid_for {
-                                return Some(name.begin);
-                            }
+                        if name.name == *pid_for {
+                            return Some(name.begin);
                         }
-                } 
+                    }
+                    Array { name, var } => {
+                        if name.name == *pid_for {
+                            return Some(name.begin);
+                        }
+                    }
                 },
-                Command::Write { val } => {},
+                Command::Write { val } => {}
             }
         }
-        
 
         return None;
     }
 
-
     // downto do zera
-// zeby nie zmienialo iteratora nic inaczej blad
+    // zeby nie zmienialo iteratora nic inaczej blad
     // TODO: check na wartosci
     pub fn command_for(
         pid: &String,
@@ -628,12 +639,16 @@ if pid.name == *pid_for {
     ) -> Result<Vec<Instruction>, CompilerError> {
         let mut res: Vec<Instruction> = vec![];
 
-
         let check = Self::check_for_assignment(pid, comm);
         match check {
-            Some(position) => {return Err(CompilerError { error_type: LoopIndexAssignment, id: pid.clone(), pos:  position });}
-,
-            None => {},
+            Some(position) => {
+                return Err(CompilerError {
+                    error_type: LoopIndexAssignment,
+                    id: pid.clone(),
+                    pos: position,
+                });
+            }
+            None => {}
         }
 
         /* musimy jakos zainicjalizowac zmienna */
@@ -645,13 +660,14 @@ if pid.name == *pid_for {
 
         // obslugujemy tylko jeden case wiec:
         res.extend(Self::handle_value(val_lhs, stack, initialized)?); // A == poczatkowa wartosc,
-        // po ktorej iterujemy  
+        // po ktorej iterujemy
 
-        res.push(Instruction::STORE{pos: iterator_position}); 
+        res.push(Instruction::STORE {
+            pos: iterator_position,
+        });
         initialized.insert(pid.clone());
 
-        
-        let loop_begin: usize= res.len();
+        let loop_begin: usize = res.len();
 
         let mut block_instructions: Vec<Instruction> = vec![];
         block_instructions.extend(Self::handle_commands(
@@ -660,53 +676,67 @@ if pid.name == *pid_for {
             stack,
             sp,
             procedures,
-        )?); 
+        )?);
         let block_instructions_len = block_instructions.len();
 
-       
         if is_downto {
             res.extend(Self::handle_value(val_rhs, stack, initialized)?);
 
-            res.push(Instruction::DEC {pos: A});
-            res.push(Instruction::SWP{ pos: E});
-            res.push(Instruction::LOAD {pos: iterator_position});
+            res.push(Instruction::DEC { pos: A });
+            res.push(Instruction::SWP { pos: E });
+            res.push(Instruction::LOAD {
+                pos: iterator_position,
+            });
 
-            res.push(Instruction::SUB { pos: E});
+            res.push(Instruction::SUB { pos: E });
         } else {
-             // A == iterator
-            res.push(Instruction::LOAD {pos: iterator_position});
-            // E == iterator 
-            res.push(Instruction::SWP{ pos: E});
+            // A == iterator
+            res.push(Instruction::LOAD {
+                pos: iterator_position,
+            });
+            // E == iterator
+            res.push(Instruction::SWP { pos: E });
             // A = wartosc koncowa
             res.extend(Self::handle_value(val_rhs, stack, initialized)?);
-            // inc na wartosci koncowej 
+            // inc na wartosci koncowej
             res.push(Instruction::INC { pos: A });
             // jezeli teraz A bedzie ujemne, to znaczy, ze iterator jest za maly i musimy go
             // zwiekszyc o jeden i skoczyc na poczatek petli
-            res.push(Instruction::SUB { pos: E});
-
+            res.push(Instruction::SUB { pos: E });
         }
 
-        res.push(Instruction::JZERO { pos: ( block_instructions_len + 5) as i64, adjust: true }); // + na inc
+        res.push(Instruction::JZERO {
+            pos: (block_instructions_len + 5) as i64,
+            adjust: true,
+        }); // + na inc
 
         res.extend(block_instructions);
 
-
         if is_downto {
-            res.push(Instruction::LOAD {pos: iterator_position});
+            res.push(Instruction::LOAD {
+                pos: iterator_position,
+            });
             res.push(Instruction::DEC { pos: A });
-            res.push(Instruction::STORE {pos: iterator_position});
-            
+            res.push(Instruction::STORE {
+                pos: iterator_position,
+            });
         } else {
-            res.push(Instruction::LOAD {pos: iterator_position});
+            res.push(Instruction::LOAD {
+                pos: iterator_position,
+            });
             res.push(Instruction::INC { pos: A });
-            res.push(Instruction::STORE {pos: iterator_position});
+            res.push(Instruction::STORE {
+                pos: iterator_position,
+            });
         }
-        res.push(Instruction::JUMP{pos: -((res.len() - loop_begin) as i64) as i64, adjust: true});
+        res.push(Instruction::JUMP {
+            pos: -((res.len() - loop_begin) as i64) as i64,
+            adjust: true,
+        });
 
         /* clearing the stack */
         stack.remove(pid);
-     //   sp -= 1;
+        //   sp -= 1;
         initialized.remove(pid);
 
         return Ok(res);

@@ -129,75 +129,60 @@ impl Compiler {
         return res;
     }
 
-    // TODO:
     pub fn construct_division() -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
         // W B dzielna w C dzielnik
 
-        // G
-        // ustawiamy A
-        // zmieniamy z G 
-        // zerujemy A 
-        // dodajemy G do A
-       
-        
-        res.push(RST {pos: D});
-        res.push(RST {pos: A});
-        res.push(ADD {pos: C});
-
-        res.push(JZERO {pos: 27, adjust: true});
-
-        //res.push(GET {pos: C});
-        res.push(RST {pos: A});
-        res.push(ADD {pos: C});
-
-        res.push(SUB {pos: B});
-        res.push(JPOS {pos: 23, adjust: true});
-
-        //res.push(GET {pos: C});
-        res.push(RST {pos: A});
-        res.push(ADD {pos: C});
-
-        //res.push(PUT {pos: E});
+        res.push(RST { pos: A });
+        res.push(SWP { pos: C });
+        res.push(JZERO {
+            pos: 30,
+            adjust: true,
+        });
+        res.push(SWP { pos: C });
         res.push(SWP { pos: E });
+        /*******/
 
-        res.push(RST {pos: F});
-        res.push(INC {pos: F});
+        res.push(SWP { pos: E });
+        res.push(RST { pos: D });
+        res.push(SWP { pos: D });
+        res.push(ADD { pos: C });
+        res.push(SUB { pos: B });
+        res.push(JPOS {
+            pos: 21,
+            adjust: true,
+        });
+        res.push(ADD { pos: C });
+        res.push(SWP { pos: D });
+        res.push(RST { pos: E });
+        res.push(SWP { pos: E });
+        res.push(ADD { pos: C });
+        res.push(RST { pos: F });
+        res.push(INC { pos: F });
+        /*********************/
+        res.push(SUB { pos: B });
+        res.push(JPOS {
+            pos: -14,
+            adjust: true,
+        });
+        res.push(ADD { pos: D });
+        res.push(SWP { pos: E });
+        res.push(SWP { pos: B });
+        res.push(SUB { pos: E });
+        res.push(SWP { pos: B });
+        res.push(ADD { pos: F });
+        res.push(SHL { pos: D });
+        res.push(SHL { pos: E });
+        res.push(SHL { pos: F });
+        res.push(SWP { pos: E });
+        res.push(JUMP {
+            pos: -12,
+            adjust: true,
+        });
+        /*******/
 
-        //res.push(GET {pos: E});
-        res.push(RST {pos: A});
-        res.push(ADD {pos: E});
-
-        res.push(SUB {pos: B});
-        res.push(JPOS {pos: 13, adjust: true});
-
-       // res.push(GET {pos: B});
-        res.push(RST {pos: A});
-        res.push(ADD {pos: B});
-
-        res.push(SUB {pos: E});
-
-        //res.push(PUT {pos: B});
-        res.push(SWP {pos: B});
-
-       // res.push(GET {pos: D});
-        res.push(RST {pos: A});
-        res.push(ADD {pos: D});
-
-
-        res.push(ADD {pos: F});
-
-       // res.push(PUT {pos: D});
-        res.push(SWP {pos: D});
-
-        res.push(SHL {pos: E});
-        res.push(SHL {pos: F});
-        res.push(JUMP {pos: -13, adjust: true});
-        res.push(JUMP {pos: -23, adjust: true});
-
-        //res.push(GET {pos: D});
-        res.push(RST {pos: A});
-        res.push(ADD {pos: D});
+        res.push(SWP { pos: D });
+        /**********/
 
         return res;
     }
@@ -205,6 +190,9 @@ impl Compiler {
     // TODO:
     pub fn construct_modulo() -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
+
+        res.extend(Self::construct_division());
+        res.push(Instruction::SWP { pos: B });
 
         return res;
     }

@@ -3,6 +3,6 @@ PROGRAM IS
 IN
   READ n;
   READ p;
-  z := n / p;
+  z := n % p;
   WRITE z;
 END
