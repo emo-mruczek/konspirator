@@ -201,7 +201,45 @@ fn handle_error(error: CompilerError, input: &String) {
                 .expect("Error while splitting")
                 .to_string();
             panic!("Error: LoopIndexAssignment {} on line {}", id, line);
-        }
+        },
+ AssignmentToConstType => {
+            let id: String = error
+                .id
+                .split('@')
+                .next()
+                .expect("Error while splitting")
+                .to_string();
+            panic!("Error: AssignmentToConstType {} on line {}", id, line);
+        },
+ IncorrectCallWithConst => {
+            let id: String = error
+                .id
+                .split('@')
+                .next()
+                .expect("Error while splitting")
+                .to_string();
+            panic!("Error: IncorrectCallWithConst {} on line {}", id, line);
+        },
+CallWithScalarAsAnArray => {
+            let id: String = error
+                .id
+                .split('@')
+                .next()
+                .expect("Error while splitting")
+                .to_string();
+            panic!("Error: CallWithScalarAsAnArray {} on line {}", id, line);
+        },
+        CallWithArrayAsAScalar => {
+            let id: String = error
+                .id
+                .split('@')
+                .next()
+                .expect("Error while splitting")
+                .to_string();
+            panic!("Error: CallWithArrayAsAScalar {} on line {}", id, line);
+        },
+
+
     };
 }
 

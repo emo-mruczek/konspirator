@@ -90,7 +90,7 @@ impl Compiler {
             &self.program.main.commands,
             &mut self.initialized,
             &mut self.stack,
-            self.sp,
+            &mut self.sp,
             &self.procedures,
         )?);
 
@@ -103,7 +103,7 @@ impl Compiler {
         commands: &Vec<Command>,
         initialized: &mut HashSet<String>,
         stack: &mut HashMap<String, Variable>,
-        sp: u64,
+        sp: &mut u64,
         procedures: &HashMap<String, ProcedureCompiler>,
     ) -> Result<Vec<Instruction>, CompilerError> {
         let mut ret: Vec<Instruction> = vec![];
@@ -144,7 +144,7 @@ impl Compiler {
                         Self::command_repeat(&cond, &comm, initialized, stack, sp, procedures)?;
                     ret.extend(res);
                 }
-                // TODO
+                // TODO tests
                 For {
                     pid,
                     val_lhs,

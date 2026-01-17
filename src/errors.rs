@@ -1,16 +1,20 @@
 // TODO:
 
+
 pub enum CompilingErrorType {
     UndeclaredVariable,
     MultipleVariableDeclarations,
     UndeclaredProcedure,
     MultipleProcedureDeclaration,
     RecursiveProcedureCall,
-    // TODO: wrong I O T
     IncorrectUseOfVariable,
     IndexOutOfBounds,
     ArrayTypeVariableAsIndex,
     IncorrectTypeArgument,
+    AssignmentToConstType,
+    IncorrectCallWithConst,
+    CallWithScalarAsAnArray,
+    CallWithArrayAsAScalar,
     IncorrectNumberOfArguments,
     VariableNotInitialized,
     LoopIndexAssignment,

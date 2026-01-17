@@ -3,13 +3,14 @@
 use crate::ast::*;
 use crate::ast::{Identifier::*, *};
 use crate::compiler::Compiler;
-use crate::errors::CompilerError;
+use crate::errors::{CompilerError, CompilingErrorType};
 use crate::errors::CompilingErrorType::*;
 use crate::helpers::*;
 use crate::instructions::Instruction::{self, *};
 use crate::instructions::Register::*;
 use crate::procedures_compiler::ProcedureCompiler;
 use std::collections::{HashMap, HashSet};
+use crate::ast::Command::*;
 
 impl Compiler {
     pub fn command_assign(
@@ -258,7 +259,7 @@ impl Compiler {
         else_comm: &Option<Vec<Command>>,
         initialized: &mut HashSet<String>,
         stack: &mut HashMap<String, Variable>,
-        sp: u64,
+        sp: &mut u64,
         procedures: &HashMap<String, ProcedureCompiler>,
     ) -> Result<Vec<Instruction>, CompilerError> {
         let mut res: Vec<Instruction> = vec![];
@@ -356,7 +357,7 @@ impl Compiler {
         comm: &Vec<Command>,
         initialized: &mut HashSet<String>,
         stack: &mut HashMap<String, Variable>,
-        sp: u64,
+        sp: &mut u64,
         procedures: &HashMap<String, ProcedureCompiler>,
     ) -> Result<Vec<Instruction>, CompilerError> {
         let mut res: Vec<Instruction> = vec![];
@@ -441,7 +442,7 @@ impl Compiler {
         comm: &Vec<Command>,
         initialized: &mut HashSet<String>,
         stack: &mut HashMap<String, Variable>,
-        sp: u64,
+        sp: &mut u64,
         procedures: &HashMap<String, ProcedureCompiler>,
     ) -> Result<Vec<Instruction>, CompilerError> {
         let mut res: Vec<Instruction> = vec![];
@@ -626,6 +627,7 @@ impl Compiler {
     // downto do zera
     // zeby nie zmienialo iteratora nic inaczej blad
     // TODO: check na wartosci
+    // TODO: EXAMPLE A naprawic!
     pub fn command_for(
         pid: &String,
         val_lhs: &Value,
@@ -634,7 +636,7 @@ impl Compiler {
         is_downto: bool,
         initialized: &mut HashSet<String>,
         stack: &mut HashMap<String, Variable>,
-        mut sp: u64,
+        sp: &mut u64,
         procedures: &HashMap<String, ProcedureCompiler>,
     ) -> Result<Vec<Instruction>, CompilerError> {
         let mut res: Vec<Instruction> = vec![];
@@ -654,9 +656,9 @@ impl Compiler {
         /* musimy jakos zainicjalizowac zmienna */
 
         // TODO: error ze nie moze to byc array
-        stack.insert(pid.clone(), Variable::Atomic { position: sp });
-        let iterator_position: i64 = sp as i64;
-        sp += 1;
+        stack.insert(pid.clone(), Variable::Atomic { position: *sp });
+        let iterator_position: i64 = *sp as i64;
+        *sp += 1;
 
         // obslugujemy tylko jeden case wiec:
         res.extend(Self::handle_value(val_lhs, stack, initialized)?); // A == poczatkowa wartosc,
@@ -736,7 +738,7 @@ impl Compiler {
 
         /* clearing the stack */
         stack.remove(pid);
-        //   sp -= 1;
+           *sp -= 1;
         initialized.remove(pid);
 
         return Ok(res);
@@ -747,7 +749,7 @@ impl Compiler {
         procedures: &HashMap<String, ProcedureCompiler>,
         initialized: &mut HashSet<String>,
         stack: &mut HashMap<String, Variable>,
-        mut sp: u64,
+        sp: &mut u64,
     ) -> Result<Vec<Instruction>, CompilerError> {
         let mut res: Vec<Instruction> = vec![];
 
@@ -773,6 +775,189 @@ impl Compiler {
         let procedure_declarations: Option<Declarations> = procedure_compiler.get_declarations();
         let call_arguments: Args = call.args.clone();
         let procedure_arguments: ArgsDecl = procedure_compiler.get_declared_arguments();
+
+        // dla kazdej deklaracji z arg decl
+        // sprawdz jej typ a nastepnie
+        // sprawdz wszystkie komendy w ciele funkcji
+        // i nastepnie czy jest git 
+
+
+        // TODO: czy to w ogole poprawnie się wywala?
+        let mut argument_position = 0;
+        for arg_decl in &procedure_arguments {
+            match arg_decl.type_name {
+                Type::Array => {
+for command in procedure_compiler.get_commands() {
+                        match command {
+                                                        Call {call} => {
+                                let another_name = call.name.name;
+                                let another_procedure_compiler_result = procedures.get(&another_name);
+                                let another_procedure_compiler: &ProcedureCompiler;
+                                match another_procedure_compiler_result {
+                                    Some(pc) => another_procedure_compiler = pc,
+                                     None => {
+                                        return Err(CompilerError {
+                                                error_type: UndeclaredProcedure,
+                                                id: procedure_name,
+                                                pos: call.name.begin,
+                                                });
+                                        }
+                                }
+                                let another_procedure_arguments = another_procedure_compiler.get_declared_arguments();
+                                let another_procedure_argument = another_procedure_arguments[argument_position].clone(); // TODO: czy to dziala?
+
+                                match another_procedure_argument.type_name {
+                                    Type::Array => {},
+
+                                    _ => {return Err(CompilerError{error_type: CompilingErrorType::CallWithArrayAsAScalar, id: another_name , pos: arg_decl.name.begin});}
+                                }
+                            },
+                            _ => {}
+                        }
+                    }
+
+
+                },
+                Type::Const => {
+                    for command in procedure_compiler.get_commands() {
+                        match command {
+                            Assign { name, expr } => {
+                                match name {
+                                    Var { name } => {
+                                        if (name.name == arg_decl.name.name) {
+                                            return Err(CompilerError{error_type: CompilingErrorType::AssignmentToConstType, id: name.name , pos: name.begin});
+                                        }
+                                    },
+                                    Array_Var { name, var } => {
+if (name.name == arg_decl.name.name) {
+                                            return Err(CompilerError{error_type: CompilingErrorType::AssignmentToConstType, id: name.name , pos: name.begin});
+                                        }
+                                    },
+                                    Array { name, var } => {
+if (name.name == arg_decl.name.name) {
+                                            return Err(CompilerError{error_type: CompilingErrorType::AssignmentToConstType, id: name.name , pos: name.begin});
+                                        }
+                                    }
+                                }
+                            },
+                            Call {call} => {
+                                let another_name = call.name.name;
+                                let another_procedure_compiler_result = procedures.get(&another_name);
+                                let another_procedure_compiler: &ProcedureCompiler;
+                                match another_procedure_compiler_result {
+                                    Some(pc) => another_procedure_compiler = pc,
+                                     None => {
+                                        return Err(CompilerError {
+                                                error_type: UndeclaredProcedure,
+                                                id: procedure_name,
+                                                pos: call.name.begin,
+                                                });
+                                        }
+                                }
+                                let another_procedure_arguments = another_procedure_compiler.get_declared_arguments();
+                                let another_procedure_argument = another_procedure_arguments[argument_position].clone(); // TODO: czy to dziala?
+
+                                match another_procedure_argument.type_name {
+                                    Type::Const => {},
+
+                                    _ => {return Err(CompilerError{error_type: CompilingErrorType::IncorrectCallWithConst, id: another_name , pos: arg_decl.name.begin});}
+                                }
+                            },
+                            _ => {}
+                        }
+                    }
+                },
+                // TODO: co gdy jakby czytamy ją ale np w a := b?
+                Type::Undefined => {/*TODO*/
+for command in procedure_compiler.get_commands() {
+                        match command {
+                            Read { name } => {
+                                match name {
+                                    Var { name } => {
+                                        if (name.name == arg_decl.name.name) {
+                                            return Err(CompilerError{error_type: CompilingErrorType::AssignmentToConstType, id: name.name , pos: name.begin});
+                                        }
+                                    },
+                                    Array_Var { name, var } => {
+if (name.name == arg_decl.name.name) {
+                                            return Err(CompilerError{error_type: CompilingErrorType::AssignmentToConstType, id: name.name , pos: name.begin});
+                                        }
+                                    },
+                                    Array { name, var } => {
+if (name.name == arg_decl.name.name) {
+                                            return Err(CompilerError{error_type: CompilingErrorType::AssignmentToConstType, id: name.name , pos: name.begin});
+                                        }
+                                    }
+                                }
+                            },
+                            Call {call} => {
+                                let another_name = call.name.name;
+                                let another_procedure_compiler_result = procedures.get(&another_name);
+                                let another_procedure_compiler: &ProcedureCompiler;
+                                match another_procedure_compiler_result {
+                                    Some(pc) => another_procedure_compiler = pc,
+                                     None => {
+                                        return Err(CompilerError {
+                                                error_type: UndeclaredProcedure,
+                                                id: procedure_name,
+                                                pos: call.name.begin,
+                                                });
+                                        }
+                                }
+                                let another_procedure_arguments = another_procedure_compiler.get_declared_arguments();
+                                let another_procedure_argument = another_procedure_arguments[argument_position].clone(); // TODO: czy to dziala?
+
+                                match another_procedure_argument.type_name {
+                                    Type::Scalar => {},
+                                    Type::Undefined => {},
+
+                                    _ => {return Err(CompilerError{error_type: CompilingErrorType::IncorrectCallWithConst, id: another_name , pos: arg_decl.name.begin});}
+                                }
+                            },
+                            _ => {}
+                        }
+                    }
+
+
+                },
+                Type::Scalar => {
+
+                    for command in procedure_compiler.get_commands() {
+                        match command {
+                                                        Call {call} => {
+                                let another_name = call.name.name;
+                                let another_procedure_compiler_result = procedures.get(&another_name);
+                                let another_procedure_compiler: &ProcedureCompiler;
+                                match another_procedure_compiler_result {
+                                    Some(pc) => another_procedure_compiler = pc,
+                                     None => {
+                                        return Err(CompilerError {
+                                                error_type: UndeclaredProcedure,
+                                                id: procedure_name,
+                                                pos: call.name.begin,
+                                                });
+                                        }
+                                }
+                                let another_procedure_arguments = another_procedure_compiler.get_declared_arguments();
+                                let another_procedure_argument = another_procedure_arguments[argument_position].clone(); // TODO: czy to dziala?
+
+                                match another_procedure_argument.type_name {
+                                    Type::Array => {return Err(CompilerError{error_type: CompilingErrorType::CallWithScalarAsAnArray, id: another_name , pos: arg_decl.name.begin});}
+
+                                    _ => {}
+                                }
+                            },
+                            _ => {}
+                        }
+                    }
+
+                    
+
+},
+            }
+            argument_position += 1;
+        }
+       
 
         if procedure_arguments.len() != call_arguments.len() {
             return Err(CompilerError {
@@ -802,11 +987,11 @@ impl Compiler {
                         Declaration::Atomic { name } => {
                             stack.insert(
                                 format!("{}@{}", name.name, procedure_name),
-                                Variable::Atomic { position: sp },
+                                Variable::Atomic { position: *sp },
                             );
 
                             println!("SP: {}", sp);
-                            sp += 1;
+                            *sp += 1;
                         }
                         Declaration::Array {
                             name,
@@ -816,13 +1001,13 @@ impl Compiler {
                             stack.insert(
                                 format!("{}@{}", name.name, procedure_name),
                                 Variable::Array {
-                                    position: sp,
+                                    position: *sp,
                                     lhs: num_lhs,
                                     rhs: num_rhs,
                                 },
                             );
                             println!("SP: {}", sp);
-                            sp += num_rhs - num_lhs + 1;
+                             *sp += num_rhs - num_lhs + 1;
                         }
                     }
                 }
@@ -830,7 +1015,7 @@ impl Compiler {
             None => println!("Nothing declared!"),
         }
 
-        //         // iterujemy po argumentach wywołania oraz argumentach z procedury
+        // iterujemy po argumentach wywołania oraz argumentach z procedury
         for (argument, declared_argument) in call_arguments.iter().zip(procedure_arguments) {
             let mut variable_id: PID;
             let mut argument_id: PID;
@@ -898,6 +1083,10 @@ impl Compiler {
         }
         //
         //
+        
+        
+        
+
         res.extend(Self::handle_commands(
             &procedure_compiler.get_commands(),
             initialized,
@@ -905,6 +1094,7 @@ impl Compiler {
             sp,
             procedures,
         )?);
+
 
         return Ok(res);
     }
