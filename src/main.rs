@@ -160,14 +160,14 @@ fn handle_error(error: CompilerError, input: &String) {
                 .to_string();
             panic!("Error: ArrayTypeVariableAsIndex {} on line {}", id, line);
         }
-        IncorrectTypeArgument => {
+        IncorrectArgumentType => {
             let id: String = error
                 .id
                 .split('@')
                 .next()
                 .expect("Error while splitting")
                 .to_string();
-            panic!("Error: ArrayTypeVariableAsIndex {} on line {}", id, line);
+            panic!("Error: IncorrectArgumentType {} on line {}", id, line);
         }
         IncorrectNumberOfArguments => {
             panic!(
@@ -201,8 +201,8 @@ fn handle_error(error: CompilerError, input: &String) {
                 .expect("Error while splitting")
                 .to_string();
             panic!("Error: LoopIndexAssignment {} on line {}", id, line);
-        },
- AssignmentToConstType => {
+        }
+        AssignmentToConstType => {
             let id: String = error
                 .id
                 .split('@')
@@ -210,8 +210,8 @@ fn handle_error(error: CompilerError, input: &String) {
                 .expect("Error while splitting")
                 .to_string();
             panic!("Error: AssignmentToConstType {} on line {}", id, line);
-        },
- IncorrectCallWithConst => {
+        }
+        IncorrectCallWithConst => {
             let id: String = error
                 .id
                 .split('@')
@@ -219,8 +219,8 @@ fn handle_error(error: CompilerError, input: &String) {
                 .expect("Error while splitting")
                 .to_string();
             panic!("Error: IncorrectCallWithConst {} on line {}", id, line);
-        },
-CallWithScalarAsAnArray => {
+        }
+        CallWithScalarAsAnArray => {
             let id: String = error
                 .id
                 .split('@')
@@ -228,7 +228,7 @@ CallWithScalarAsAnArray => {
                 .expect("Error while splitting")
                 .to_string();
             panic!("Error: CallWithScalarAsAnArray {} on line {}", id, line);
-        },
+        }
         CallWithArrayAsAScalar => {
             let id: String = error
                 .id
@@ -237,9 +237,7 @@ CallWithScalarAsAnArray => {
                 .expect("Error while splitting")
                 .to_string();
             panic!("Error: CallWithArrayAsAScalar {} on line {}", id, line);
-        },
-
-
+        }
     };
 }
 

@@ -1,16 +1,16 @@
 /* commands */
 
+use crate::ast::Command::*;
 use crate::ast::*;
 use crate::ast::{Identifier::*, *};
 use crate::compiler::Compiler;
-use crate::errors::{CompilerError, CompilingErrorType};
 use crate::errors::CompilingErrorType::*;
+use crate::errors::{CompilerError, CompilingErrorType};
 use crate::helpers::*;
 use crate::instructions::Instruction::{self, *};
 use crate::instructions::Register::*;
 use crate::procedures_compiler::ProcedureCompiler;
 use std::collections::{HashMap, HashSet};
-use crate::ast::Command::*;
 
 impl Compiler {
     pub fn command_assign(
@@ -738,7 +738,7 @@ impl Compiler {
 
         /* clearing the stack */
         stack.remove(pid);
-           *sp -= 1;
+        *sp -= 1;
         initialized.remove(pid);
 
         return Ok(res);
@@ -779,185 +779,232 @@ impl Compiler {
         // dla kazdej deklaracji z arg decl
         // sprawdz jej typ a nastepnie
         // sprawdz wszystkie komendy w ciele funkcji
-        // i nastepnie czy jest git 
-
+        // i nastepnie czy jest git
 
         // TODO: czy to w ogole poprawnie się wywala?
         let mut argument_position = 0;
         for arg_decl in &procedure_arguments {
             match arg_decl.type_name {
                 Type::Array => {
-for command in procedure_compiler.get_commands() {
+                    for command in procedure_compiler.get_commands() {
                         match command {
-                                                        Call {call} => {
+                            Call { call } => {
                                 let another_name = call.name.name;
-                                let another_procedure_compiler_result = procedures.get(&another_name);
+                                let another_procedure_compiler_result =
+                                    procedures.get(&another_name);
                                 let another_procedure_compiler: &ProcedureCompiler;
                                 match another_procedure_compiler_result {
                                     Some(pc) => another_procedure_compiler = pc,
-                                     None => {
+                                    None => {
                                         return Err(CompilerError {
-                                                error_type: UndeclaredProcedure,
-                                                id: procedure_name,
-                                                pos: call.name.begin,
-                                                });
-                                        }
+                                            error_type: UndeclaredProcedure,
+                                            id: procedure_name,
+                                            pos: call.name.begin,
+                                        });
+                                    }
                                 }
-                                let another_procedure_arguments = another_procedure_compiler.get_declared_arguments();
-                                let another_procedure_argument = another_procedure_arguments[argument_position].clone(); // TODO: czy to dziala?
+                                let another_procedure_arguments =
+                                    another_procedure_compiler.get_declared_arguments();
+                                let another_procedure_argument =
+                                    another_procedure_arguments[argument_position].clone(); // TODO: czy to dziala?
 
                                 match another_procedure_argument.type_name {
-                                    Type::Array => {},
+                                    Type::Array => {}
 
-                                    _ => {return Err(CompilerError{error_type: CompilingErrorType::CallWithArrayAsAScalar, id: another_name , pos: arg_decl.name.begin});}
+                                    _ => {
+                                        return Err(CompilerError {
+                                            error_type: CompilingErrorType::CallWithArrayAsAScalar,
+                                            id: another_name,
+                                            pos: arg_decl.name.begin,
+                                        });
+                                    }
                                 }
-                            },
+                            }
                             _ => {}
                         }
                     }
-
-
-                },
+                }
                 Type::Const => {
                     for command in procedure_compiler.get_commands() {
                         match command {
-                            Assign { name, expr } => {
-                                match name {
-                                    Var { name } => {
-                                        if (name.name == arg_decl.name.name) {
-                                            return Err(CompilerError{error_type: CompilingErrorType::AssignmentToConstType, id: name.name , pos: name.begin});
-                                        }
-                                    },
-                                    Array_Var { name, var } => {
-if (name.name == arg_decl.name.name) {
-                                            return Err(CompilerError{error_type: CompilingErrorType::AssignmentToConstType, id: name.name , pos: name.begin});
-                                        }
-                                    },
-                                    Array { name, var } => {
-if (name.name == arg_decl.name.name) {
-                                            return Err(CompilerError{error_type: CompilingErrorType::AssignmentToConstType, id: name.name , pos: name.begin});
-                                        }
+                            Assign { name, expr } => match name {
+                                Var { name } => {
+                                    if (name.name == arg_decl.name.name) {
+                                        return Err(CompilerError {
+                                            error_type: CompilingErrorType::AssignmentToConstType,
+                                            id: name.name,
+                                            pos: name.begin,
+                                        });
+                                    }
+                                }
+                                Array_Var { name, var } => {
+                                    if (name.name == arg_decl.name.name) {
+                                        return Err(CompilerError {
+                                            error_type: CompilingErrorType::AssignmentToConstType,
+                                            id: name.name,
+                                            pos: name.begin,
+                                        });
+                                    }
+                                }
+                                Array { name, var } => {
+                                    if (name.name == arg_decl.name.name) {
+                                        return Err(CompilerError {
+                                            error_type: CompilingErrorType::AssignmentToConstType,
+                                            id: name.name,
+                                            pos: name.begin,
+                                        });
                                     }
                                 }
                             },
-                            Call {call} => {
+                            Call { call } => {
                                 let another_name = call.name.name;
-                                let another_procedure_compiler_result = procedures.get(&another_name);
+                                let another_procedure_compiler_result =
+                                    procedures.get(&another_name);
                                 let another_procedure_compiler: &ProcedureCompiler;
                                 match another_procedure_compiler_result {
                                     Some(pc) => another_procedure_compiler = pc,
-                                     None => {
+                                    None => {
                                         return Err(CompilerError {
-                                                error_type: UndeclaredProcedure,
-                                                id: procedure_name,
-                                                pos: call.name.begin,
-                                                });
-                                        }
+                                            error_type: UndeclaredProcedure,
+                                            id: procedure_name,
+                                            pos: call.name.begin,
+                                        });
+                                    }
                                 }
-                                let another_procedure_arguments = another_procedure_compiler.get_declared_arguments();
-                                let another_procedure_argument = another_procedure_arguments[argument_position].clone(); // TODO: czy to dziala?
+                                let another_procedure_arguments =
+                                    another_procedure_compiler.get_declared_arguments();
+                                let another_procedure_argument =
+                                    another_procedure_arguments[argument_position].clone(); // TODO: czy to dziala?
 
                                 match another_procedure_argument.type_name {
-                                    Type::Const => {},
+                                    Type::Const => {}
 
-                                    _ => {return Err(CompilerError{error_type: CompilingErrorType::IncorrectCallWithConst, id: another_name , pos: arg_decl.name.begin});}
+                                    _ => {
+                                        return Err(CompilerError {
+                                            error_type: CompilingErrorType::IncorrectCallWithConst,
+                                            id: another_name,
+                                            pos: arg_decl.name.begin,
+                                        });
+                                    }
                                 }
-                            },
+                            }
                             _ => {}
                         }
                     }
-                },
+                }
                 // TODO: co gdy jakby czytamy ją ale np w a := b?
-                Type::Undefined => {/*TODO*/
-for command in procedure_compiler.get_commands() {
-                        match command {
-                            Read { name } => {
-                                match name {
-                                    Var { name } => {
-                                        if (name.name == arg_decl.name.name) {
-                                            return Err(CompilerError{error_type: CompilingErrorType::AssignmentToConstType, id: name.name , pos: name.begin});
-                                        }
-                                    },
-                                    Array_Var { name, var } => {
-if (name.name == arg_decl.name.name) {
-                                            return Err(CompilerError{error_type: CompilingErrorType::AssignmentToConstType, id: name.name , pos: name.begin});
-                                        }
-                                    },
-                                    Array { name, var } => {
-if (name.name == arg_decl.name.name) {
-                                            return Err(CompilerError{error_type: CompilingErrorType::AssignmentToConstType, id: name.name , pos: name.begin});
-                                        }
-                                    }
-                                }
-                            },
-                            Call {call} => {
-                                let another_name = call.name.name;
-                                let another_procedure_compiler_result = procedures.get(&another_name);
-                                let another_procedure_compiler: &ProcedureCompiler;
-                                match another_procedure_compiler_result {
-                                    Some(pc) => another_procedure_compiler = pc,
-                                     None => {
-                                        return Err(CompilerError {
-                                                error_type: UndeclaredProcedure,
-                                                id: procedure_name,
-                                                pos: call.name.begin,
-                                                });
-                                        }
-                                }
-                                let another_procedure_arguments = another_procedure_compiler.get_declared_arguments();
-                                let another_procedure_argument = another_procedure_arguments[argument_position].clone(); // TODO: czy to dziala?
-
-                                match another_procedure_argument.type_name {
-                                    Type::Scalar => {},
-                                    Type::Undefined => {},
-
-                                    _ => {return Err(CompilerError{error_type: CompilingErrorType::IncorrectCallWithConst, id: another_name , pos: arg_decl.name.begin});}
-                                }
-                            },
-                            _ => {}
-                        }
-                    }
-
-
-                },
-                Type::Scalar => {
-
+                Type::Undefined => {
+                    /*TODO*/
                     for command in procedure_compiler.get_commands() {
                         match command {
-                                                        Call {call} => {
+                            Read { name } => match name {
+                                Var { name } => {
+                                    if (name.name == arg_decl.name.name) {
+                                        return Err(CompilerError {
+                                            error_type: CompilingErrorType::AssignmentToConstType,
+                                            id: name.name,
+                                            pos: name.begin,
+                                        });
+                                    }
+                                }
+                                Array_Var { name, var } => {
+                                    if (name.name == arg_decl.name.name) {
+                                        return Err(CompilerError {
+                                            error_type: CompilingErrorType::AssignmentToConstType,
+                                            id: name.name,
+                                            pos: name.begin,
+                                        });
+                                    }
+                                }
+                                Array { name, var } => {
+                                    if (name.name == arg_decl.name.name) {
+                                        return Err(CompilerError {
+                                            error_type: CompilingErrorType::AssignmentToConstType,
+                                            id: name.name,
+                                            pos: name.begin,
+                                        });
+                                    }
+                                }
+                            },
+                            Call { call } => {
                                 let another_name = call.name.name;
-                                let another_procedure_compiler_result = procedures.get(&another_name);
+                                let another_procedure_compiler_result =
+                                    procedures.get(&another_name);
                                 let another_procedure_compiler: &ProcedureCompiler;
                                 match another_procedure_compiler_result {
                                     Some(pc) => another_procedure_compiler = pc,
-                                     None => {
+                                    None => {
                                         return Err(CompilerError {
-                                                error_type: UndeclaredProcedure,
-                                                id: procedure_name,
-                                                pos: call.name.begin,
-                                                });
-                                        }
+                                            error_type: UndeclaredProcedure,
+                                            id: procedure_name,
+                                            pos: call.name.begin,
+                                        });
+                                    }
                                 }
-                                let another_procedure_arguments = another_procedure_compiler.get_declared_arguments();
-                                let another_procedure_argument = another_procedure_arguments[argument_position].clone(); // TODO: czy to dziala?
+                                let another_procedure_arguments =
+                                    another_procedure_compiler.get_declared_arguments();
+                                let another_procedure_argument =
+                                    another_procedure_arguments[argument_position].clone(); // TODO: czy to dziala?
 
                                 match another_procedure_argument.type_name {
-                                    Type::Array => {return Err(CompilerError{error_type: CompilingErrorType::CallWithScalarAsAnArray, id: another_name , pos: arg_decl.name.begin});}
+                                    Type::Scalar => {}
+                                    Type::Undefined => {}
+
+                                    _ => {
+                                        return Err(CompilerError {
+                                            error_type: CompilingErrorType::IncorrectCallWithConst,
+                                            id: another_name,
+                                            pos: arg_decl.name.begin,
+                                        });
+                                    }
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+                Type::Scalar => {
+                    for command in procedure_compiler.get_commands() {
+                        match command {
+                            Call { call } => {
+                                let another_name = call.name.name;
+                                let another_procedure_compiler_result =
+                                    procedures.get(&another_name);
+                                let another_procedure_compiler: &ProcedureCompiler;
+                                match another_procedure_compiler_result {
+                                    Some(pc) => another_procedure_compiler = pc,
+                                    None => {
+                                        return Err(CompilerError {
+                                            error_type: UndeclaredProcedure,
+                                            id: procedure_name,
+                                            pos: call.name.begin,
+                                        });
+                                    }
+                                }
+                                let another_procedure_arguments =
+                                    another_procedure_compiler.get_declared_arguments();
+                                let another_procedure_argument =
+                                    another_procedure_arguments[argument_position].clone(); // TODO: czy to dziala?
+
+                                match another_procedure_argument.type_name {
+                                    Type::Array => {
+                                        return Err(CompilerError {
+                                            error_type: CompilingErrorType::CallWithScalarAsAnArray,
+                                            id: another_name,
+                                            pos: arg_decl.name.begin,
+                                        });
+                                    }
 
                                     _ => {}
                                 }
-                            },
+                            }
                             _ => {}
                         }
                     }
-
-                    
-
-},
+                }
             }
             argument_position += 1;
         }
-       
 
         if procedure_arguments.len() != call_arguments.len() {
             return Err(CompilerError {
@@ -1007,7 +1054,7 @@ if (name.name == arg_decl.name.name) {
                                 },
                             );
                             println!("SP: {}", sp);
-                             *sp += num_rhs - num_lhs + 1;
+                            *sp += num_rhs - num_lhs + 1;
                         }
                     }
                 }
@@ -1033,13 +1080,6 @@ if (name.name == arg_decl.name.name) {
                         }
 
                         argument_id = declared_argument.name.clone();
-                        //   match declared_argument.type_name {
-                        //     // TODO:
-                        //       Type::Array => todo!() ,
-                        //       Type::Const => todo!(),
-                        //       Type::Undefined => todo!(),
-                        //       Type::Scalar => todo!(),
-                        // }
 
                         if variable_id.name == argument_id.name {
                             return Err(CompilerError {
@@ -1048,7 +1088,6 @@ if (name.name == arg_decl.name.name) {
                                 pos: variable_id.begin as usize,
                             });
                         }
-                        // TODO: duplicate variable declaration error
                     }
                 }
                 None => println!("No procedure declaration"),
@@ -1058,34 +1097,105 @@ if (name.name == arg_decl.name.name) {
             let pointer: &Variable = stack.get(&argument.name).unwrap();
 
             let declared_argument_name: String = declared_argument.name.name;
-            //            match declared_argument.type_name {
-            //                 Type::Array => {
-            //                     match pointer {
-            //                         Variable::Atomic { position } => {
-            //  // TODO: error!,
-            //                         println!("problemix!");
-            //
-            //                         },
-            //                         Variable::Array { position, lhs, rhs } => {
-            //                          initialized.insert(argument.name);
-            //                         stack.insert(format!("{}@{}", variable_id.name, procedure_name), Variable::Array { position: *position, lhs: *lhs, rhs: *rhs });
-            //                             initialized.insert(format!("{}@{}", variable_id.name, procedure_name));
-            //                         }
-            //                     }
-            //                 },
-            //
-            //                 Type::Const => todo!(),
-            //                 Type::Undefined => todo!(),
-            //                 Type::Scalar => todo!(),
-            //             }
-            //
-            //
+
+            match declared_argument.type_name.clone() {
+                Type::Array => {
+                    match pointer {
+                        Variable::Atomic { position } => {
+                            return Err(CompilerError {
+                                error_type: IncorrectArgumentType,
+                                id: declared_argument_name,
+                                pos: *position as usize,
+                            });
+                        }
+                        Variable::Array { position, lhs, rhs } => {
+                            initialized.insert(argument.name.clone());
+                            stack.insert(
+                                format!("{}@{}", declared_argument_name, procedure_name), // TODO:
+                                // is this correct?
+                                Variable::Array {
+                                    position: *position,
+                                    lhs: *lhs,
+                                    rhs: *rhs,
+                                },
+                            );
+                            initialized
+                                .insert(format!("{}@{}", declared_argument_name, procedure_name));
+                        }
+                    }
+                }
+
+                Type::Const => {
+                    match pointer {
+                        Variable::Atomic { position } => {
+                            initialized.insert(argument.name.clone());
+
+                            stack.insert(
+                                format!("{}@{}", declared_argument_name, procedure_name),
+                                Variable::Atomic {
+                                    position: *position,
+                                },
+                            ); // TODO:
+                            initialized
+                                .insert(format!("{}@{}", declared_argument_name, procedure_name));
+                        }
+                        Variable::Array { position, lhs, rhs } => {
+                            return Err(CompilerError {
+                                error_type: IncorrectArgumentType,
+                                id: declared_argument_name,
+                                pos: *position as usize,
+                            });
+                        }
+                    }
+                }
+                Type::Undefined => {
+                    match pointer {
+                        Variable::Atomic { position } => {
+                            initialized.insert(argument.name.clone());
+
+                            stack.insert(
+                                format!("{}@{}", declared_argument_name, procedure_name),
+                                Variable::Atomic {
+                                    position: *position,
+                                },
+                            ); // TODO:
+                            initialized
+                                .insert(format!("{}@{}", declared_argument_name, procedure_name));
+                        }
+                        Variable::Array { position, lhs, rhs } => {
+                            return Err(CompilerError {
+                                error_type: IncorrectArgumentType,
+                                id: declared_argument_name,
+                                pos: *position as usize,
+                            });
+                        }
+                    }
+                }
+                Type::Scalar => {
+                    match pointer {
+                        Variable::Atomic { position } => {
+                            initialized.insert(argument.name.clone());
+
+                            stack.insert(
+                                format!("{}@{}", declared_argument_name, procedure_name),
+                                Variable::Atomic {
+                                    position: *position,
+                                },
+                            ); // TODO:
+                            initialized
+                                .insert(format!("{}@{}", declared_argument_name, procedure_name));
+                        }
+                        Variable::Array { position, lhs, rhs } => {
+                            return Err(CompilerError {
+                                error_type: IncorrectArgumentType,
+                                id: declared_argument_name,
+                                pos: *position as usize,
+                            });
+                        }
+                    }
+                }
+            }
         }
-        //
-        //
-        
-        
-        
 
         res.extend(Self::handle_commands(
             &procedure_compiler.get_commands(),
@@ -1094,7 +1204,6 @@ if (name.name == arg_decl.name.name) {
             sp,
             procedures,
         )?);
-
 
         return Ok(res);
     }

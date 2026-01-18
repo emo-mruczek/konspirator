@@ -1,6 +1,5 @@
 // TODO:
 
-
 pub enum CompilingErrorType {
     UndeclaredVariable,
     MultipleVariableDeclarations,
@@ -10,7 +9,7 @@ pub enum CompilingErrorType {
     IncorrectUseOfVariable,
     IndexOutOfBounds,
     ArrayTypeVariableAsIndex,
-    IncorrectTypeArgument,
+    IncorrectArgumentType,
     AssignmentToConstType,
     IncorrectCallWithConst,
     CallWithScalarAsAnArray,
