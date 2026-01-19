@@ -101,22 +101,30 @@ impl ProcedureCompiler {
                     comm,
                     is_downto,
                 } => {
-                    // TODO:
-                    //     println!("  For");
-                    //     let res = Self::command_for(&pid, val_lhs, val_rhs, &comm, *is_downto, initialized, stack, sp);
-                    //     ret.extend(res);
+                    let renamed_pid = Self::rename_pid(pid, proc_name);
+                    let renamed_val_lhs = Self::rename_value(val_lhs, proc_name);
+                    let renamed_val_rhs = Self::rename_value(val_rhs, proc_name);
+                    let renamed_commands: Vec<Command> = Self::rename_commands(comm, proc_name);
+
+                    renamed.push(Command::For {
+                        pid: renamed_pid,
+                        val_lhs: renamed_val_lhs,
+                        val_rhs: renamed_val_rhs,
+                        comm: renamed_commands,
+                        is_downto: *is_downto,
+                    })
                 }
                 Call { call } => {
-                    // TODO:
-                    // let mut renamed_arguments: Args;
-                    // let mut new_call: ProcCall;
-                    //
-                    // for argument in &call.args {
-                    //         renamed_arguments.insert(format!("{}@{}", argument.name, self.name), argument.);
-                    // }
-                    //
-                    //
-                    // renamed.push(Command::Call {call: new_call});
+
+                    let mut renamed_arguments: Args = vec![];
+                    for argument in &call.args {
+                            let new_name = format!("{}@{}", argument.name, proc_name);
+                            renamed_arguments.push(PID{name: new_name, begin: argument.begin, end: argument.end});
+
+                    }
+                    let new_call: ProcCall = ProcCall { name: call.name.clone(), args: renamed_arguments };
+
+                    renamed.push(Command::Call {call: new_call});
                 }
                 Read { name } => {
                     let res = Self::rename_identifier(name, proc_name);
@@ -250,6 +258,15 @@ impl ProcedureCompiler {
                 ret = Value::Var { val: temp_id };
             }
         }
+        return ret;
+    }
+
+    fn rename_pid(pid: &PID, proc_name: &String) -> PID {
+        let ret: PID;
+
+        let new_name: String = format!("{}@{}", pid.name, proc_name);
+        ret = PID {name: new_name, begin: pid.begin, end: pid.end};
+
         return ret;
     }
 

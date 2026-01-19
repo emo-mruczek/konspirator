@@ -24,8 +24,8 @@ impl Compiler {
                 res.extend(Self::handle_value(val, stack, initialized)?);
             }
             Add { l, r } => {
-                Self::is_initialized(&l, initialized);
-                Self::is_initialized(&r, initialized);
+                Self::is_initialized(&l, initialized)?;
+                Self::is_initialized(&r, initialized)?;
 
                 res.extend(Self::handle_value(l, stack, initialized)?);
                 res.push(SWP { pos: B });
@@ -33,8 +33,8 @@ impl Compiler {
                 res.push(ADD { pos: B });
             }
             Sub { l, r } => {
-                Self::is_initialized(&l, initialized);
-                Self::is_initialized(&r, initialized);
+                Self::is_initialized(&l, initialized)?;
+                Self::is_initialized(&r, initialized)?;
 
                 res.extend(Self::handle_value(r, stack, initialized)?);
                 res.push(SWP { pos: B });
@@ -42,8 +42,8 @@ impl Compiler {
                 res.push(SUB { pos: B });
             }
             Mul { l, r } => {
-                Self::is_initialized(&l, initialized);
-                Self::is_initialized(&r, initialized);
+                Self::is_initialized(&l, initialized)?;
+                Self::is_initialized(&r, initialized)?;
 
                 res.extend(Self::handle_value(l, stack, initialized)?);
                 res.push(SWP { pos: B });
@@ -55,8 +55,8 @@ impl Compiler {
             }
             Div { l, r } => {
                 // TODO:
-                Self::is_initialized(l, initialized);
-                Self::is_initialized(r, initialized);
+                Self::is_initialized(l, initialized)?;
+                Self::is_initialized(r, initialized)?;
 
                 res.extend(Self::handle_value(l, stack, initialized)?);
                 res.push(SWP { pos: B });
@@ -66,8 +66,8 @@ impl Compiler {
             }
             Mod { l, r } => {
                 // TODO
-                Self::is_initialized(l, initialized);
-                Self::is_initialized(r, initialized);
+                Self::is_initialized(l, initialized)?;
+                Self::is_initialized(r, initialized)?;
 
                 res.extend(Self::handle_value(l, stack, initialized)?);
                 res.push(SWP { pos: B });
