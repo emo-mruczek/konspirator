@@ -68,9 +68,14 @@ ARGSDECL: ArgsDecl = {
     v.push(ArgDecl{type_name: Type::Undefined, name: p});
     return v;
  },
+<mut v: ARGSDECL> "," <p: PID> => {
+    v.push(ArgDecl{type_name: Type::Scalar, name: p});
+    return v;
+ },
  "T" <p: PID> => vec![ArgDecl{type_name: Type::Array, name: p}],
  "I" <p: PID> => vec![ArgDecl{type_name: Type::Const, name: p}],
  "O" <p: PID> => vec![ArgDecl{type_name: Type::Undefined, name: p}],
+  <p: PID> => vec![ArgDecl{type_name: Type::Scalar, name: p}],
 }
 
 // TODO

@@ -115,16 +115,21 @@ impl ProcedureCompiler {
                     })
                 }
                 Call { call } => {
-
                     let mut renamed_arguments: Args = vec![];
                     for argument in &call.args {
-                            let new_name = format!("{}@{}", argument.name, proc_name);
-                            renamed_arguments.push(PID{name: new_name, begin: argument.begin, end: argument.end});
-
+                        let new_name = format!("{}@{}", argument.name, proc_name);
+                        renamed_arguments.push(PID {
+                            name: new_name,
+                            begin: argument.begin,
+                            end: argument.end,
+                        });
                     }
-                    let new_call: ProcCall = ProcCall { name: call.name.clone(), args: renamed_arguments };
+                    let new_call: ProcCall = ProcCall {
+                        name: call.name.clone(),
+                        args: renamed_arguments,
+                    };
 
-                    renamed.push(Command::Call {call: new_call});
+                    renamed.push(Command::Call { call: new_call });
                 }
                 Read { name } => {
                     let res = Self::rename_identifier(name, proc_name);
@@ -265,7 +270,11 @@ impl ProcedureCompiler {
         let ret: PID;
 
         let new_name: String = format!("{}@{}", pid.name, proc_name);
-        ret = PID {name: new_name, begin: pid.begin, end: pid.end};
+        ret = PID {
+            name: new_name,
+            begin: pid.begin,
+            end: pid.end,
+        };
 
         return ret;
     }
