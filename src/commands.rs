@@ -624,8 +624,6 @@ impl Compiler {
         return None;
     }
 
-    // downto do zera
-    // zeby nie zmienialo iteratora nic inaczej blad
     // TODO: check na wartosci
     // TODO: EXAMPLE A naprawic!
     pub fn command_for(
@@ -660,14 +658,31 @@ impl Compiler {
         let iterator_position: i64 = *sp as i64;
         *sp += 1;
 
+        
         // obslugujemy tylko jeden case wiec:
-        res.extend(Self::handle_value(val_lhs, stack, initialized)?); // A == poczatkowa wartosc,
+        res.extend(Self::handle_value(&val_lhs, stack, initialized)?); // A == poczatkowa wartosc,
         // po ktorej iterujemy
 
         res.push(Instruction::STORE {
             pos: iterator_position,
         });
         initialized.insert(pid.clone());
+
+
+        /* prawa strona - wartosc koncowa */
+        let end_name: String =  format!("{}:iter", pid.clone());
+        stack.insert(end_name.clone(), Variable::Atomic { position: *sp });
+        let end_value_position: i64 = *sp as i64;
+        *sp += 1;
+
+        // obslugujemy tylko jeden case wiec:
+        res.extend(Self::handle_value(&val_rhs, stack, initialized)?); // A == wartosc koncowa,
+        // ktora kopiujemy
+
+        res.push(Instruction::STORE {
+            pos: end_value_position,
+        });
+        initialized.insert(end_name.clone());
 
         let loop_begin: usize = res.len();
 
@@ -682,7 +697,7 @@ impl Compiler {
         let block_instructions_len = block_instructions.len();
 
         if is_downto {
-            res.extend(Self::handle_value(val_rhs, stack, initialized)?);
+            res.extend(Self::handle_value(&val_rhs, stack, initialized)?);
 
             res.push(Instruction::DEC { pos: A });
             res.push(Instruction::SWP { pos: E });
@@ -699,7 +714,8 @@ impl Compiler {
             // E == iterator
             res.push(Instruction::SWP { pos: E });
             // A = wartosc koncowa
-            res.extend(Self::handle_value(val_rhs, stack, initialized)?);
+           // res.extend(Self::handle_value(&val_rhs, stack, initialized)?);
+            res.push(Instruction::LOAD {pos: end_value_position});
             // inc na wartosci koncowej
             res.push(Instruction::INC { pos: A });
             // jezeli teraz A bedzie ujemne, to znaczy, ze iterator jest za maly i musimy go
@@ -738,8 +754,10 @@ impl Compiler {
 
         /* clearing the stack */
         stack.remove(pid);
-        *sp -= 1;
+        stack.remove(&end_name);
+        *sp -= 2;
         initialized.remove(pid);
+        initialized.remove(&end_name);
 
         return Ok(res);
     }
@@ -825,6 +843,8 @@ impl Compiler {
                     }
                 }
                 Type::Const => {
+                    
+                                        println!("DUPCIA@!! {:?}",arg_decl);
                     for command in procedure_compiler.get_commands() {
                         match command {
                             Assign { name, expr } => match name {
@@ -880,6 +900,8 @@ impl Compiler {
                                     Type::Const => {}
 
                                     _ => {
+
+                                        println!("DUPCIA! {} {:?}",argument_position, another_procedure_argument);
                                         return Err(CompilerError {
                                             error_type: CompilingErrorType::IncorrectCallWithConst,
                                             id: another_name,
@@ -951,6 +973,7 @@ impl Compiler {
                                     Type::Undefined => {}
 
                                     _ => {
+                                        
                                         return Err(CompilerError {
                                             error_type: CompilingErrorType::IncorrectCallWithConst,
                                             id: another_name,

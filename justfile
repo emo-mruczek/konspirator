@@ -1,4 +1,4 @@
-default: (build "tests/exampleA.imp" "dupa")
+default: (build "tests/example4.imp" "dupa")
 
 build in out:
   RUSTFLAGS=-Awarnings cargo run {{in}} {{out}}
