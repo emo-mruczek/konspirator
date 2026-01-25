@@ -1,7 +1,5 @@
 /* condition handling while */
 
-// TODO: tests
-
 use crate::ast::*;
 use crate::compiler::Compiler;
 use crate::errors::CompilerError;

@@ -29,7 +29,6 @@ impl Compiler {
     }
 
     pub fn compile(mut self) -> Result<Vec<Instruction>, CompilerError> {
-        // TODO
         match self.program.procedures {
             Some(procedures) => {
                 for procedure in procedures {
@@ -38,8 +37,6 @@ impl Compiler {
                         ProcedureCompiler::new(procedure),
                     );
                     println!("   PROCEDURES    \n{:?}", self.procedures);
-                    // TODO: error  wejscie/wyjscie
-                    // TODO:: multiple procedures declaration error
                 }
             }
             None => {
@@ -85,7 +82,6 @@ impl Compiler {
         }
 
         // compiling the main function
-
         self.instructions.extend(Self::handle_commands(
             &self.program.main.commands,
             &mut self.initialized,
@@ -144,7 +140,6 @@ impl Compiler {
                         Self::command_repeat(&cond, &comm, initialized, stack, sp, procedures)?;
                     ret.extend(res);
                 }
-                // TODO tests
                 For {
                     pid,
                     val_lhs,
@@ -166,7 +161,6 @@ impl Compiler {
                     )?;
                     ret.extend(res);
                 }
-                // TODO
                 Call { call } => {
                     println!(" Call");
                     let res = Self::command_call(call, procedures, initialized, stack, sp)?;

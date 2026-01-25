@@ -5,6 +5,5 @@ IN
   READ p;
   FOR i FROM n DOWNTO p DO
     WRITE i;
-    i := 32132;
   ENDFOR
 END

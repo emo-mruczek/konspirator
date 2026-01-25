@@ -521,7 +521,9 @@ impl Compiler {
     }
 
     pub fn check_for_assignment(pid_for: &String, commands: &Vec<Command>) -> Option<usize> {
+
         for command in commands {
+
             match command {
                 Command::Assign { name, expr } => match name {
                     Var { name } => {
@@ -695,7 +697,9 @@ impl Compiler {
         let block_instructions_len = block_instructions.len();
 
         if is_downto {
-            res.extend(Self::handle_value(&val_rhs, stack, initialized)?);
+           res.push(Instruction::LOAD {
+                pos: end_value_position,
+            });
 
             res.push(Instruction::DEC { pos: A });
             res.push(Instruction::SWP { pos: E });

@@ -187,7 +187,6 @@ impl Compiler {
         return res;
     }
 
-    // TODO:
     pub fn construct_modulo() -> Vec<Instruction> {
         let mut res: Vec<Instruction> = vec![];
 

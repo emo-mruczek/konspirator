@@ -1,4 +1,3 @@
-/* errors DONE */
 /* helper functions */
 
 use crate::ast::{Identifier::*, *};
@@ -60,7 +59,7 @@ impl Compiler {
                         error_type: VariableNotInitialized,
                         id: var_name.clone(),
                         pos: 0,
-                    }); // TODO: ?
+                    });
                 }
             }
         }

@@ -241,7 +241,6 @@ fn handle_error(error: CompilerError, input: &String) {
     };
 }
 
-// TODO:
 fn find_line(input: &String, bytes: usize) -> Option<usize> {
     let file = File::open(input).expect("Error while opening a file");
     let reader = BufReader::new(file);

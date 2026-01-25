@@ -1,4 +1,3 @@
-// TODO:
 #![allow(non_camel_case_types)]
 use std::usize;
 
@@ -102,7 +101,6 @@ pub enum Declaration {
     Atomic {
         name: PID,
     },
-    // TODO:
     Array {
         name: PID,
         num_lhs: Num,
@@ -158,7 +156,6 @@ pub enum Command {
         comm: Commands,
         cond: Condition,
     },
-    // TODO:
     For {
         pid: PID,
         val_lhs: Value,
