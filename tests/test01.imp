@@ -1,0 +1,12 @@
+# Test granic iteracji
+PROGRAM IS
+    n, v
+IN
+    v := 0;
+    READ n;
+    FOR i FROM 1 TO n DO
+        v := v + 1;
+        n := n - 1;
+    ENDFOR
+    WRITE v; # > n
+END

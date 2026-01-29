@@ -520,10 +520,12 @@ impl Compiler {
         return Ok(res);
     }
 
-    pub fn check_for_assignment(pid_for: &String, commands: &Vec<Command>) -> Option<usize> {
-
+    pub fn check_for_assignment(
+        pid_for: &String,
+        commands: &Vec<Command>,
+        procedures: &HashMap<String, ProcedureCompiler>,
+    ) -> Option<usize> {
         for command in commands {
-
             match command {
                 Command::Assign { name, expr } => match name {
                     Var { name } => {
@@ -547,7 +549,7 @@ impl Compiler {
                     comm,
                     else_comm,
                 } => {
-                    let temp = Self::check_for_assignment(pid_for, comm);
+                    let temp = Self::check_for_assignment(pid_for, comm, procedures);
                     match temp {
                         Some(result) => {
                             return Some(result);
@@ -556,17 +558,17 @@ impl Compiler {
                     }
 
                     if else_comm.is_some() {
-                        let temp_else = Self::check_for_assignment(pid_for, comm);
+                        let temp_else = Self::check_for_assignment(pid_for, comm, procedures);
                         match temp_else {
                             Some(result) => {
                                 return Some(result);
                             }
-                            None => {}, // TODO!
+                            None => {} // TODO!
                         }
                     }
                 }
                 Command::While { cond, comm } => {
-                    let temp = Self::check_for_assignment(pid_for, comm);
+                    let temp = Self::check_for_assignment(pid_for, comm, procedures);
                     match temp {
                         Some(result) => {
                             return Some(result);
@@ -575,7 +577,7 @@ impl Compiler {
                     }
                 }
                 Command::Repeat { comm, cond } => {
-                    let temp = Self::check_for_assignment(pid_for, comm);
+                    let temp = Self::check_for_assignment(pid_for, comm, procedures);
                     match temp {
                         Some(result) => {
                             return Some(result);
@@ -590,7 +592,7 @@ impl Compiler {
                     comm,
                     is_downto,
                 } => {
-                    let temp = Self::check_for_assignment(pid_for, comm);
+                    let temp = Self::check_for_assignment(pid_for, comm, procedures);
                     match temp {
                         Some(result) => {
                             return Some(result);
@@ -601,7 +603,18 @@ impl Compiler {
                         return Some(pid.begin);
                     }
                 }
-                Command::Call { call } => {}, // TODO:
+                Command::Call { call } => {
+                    let argdecl = procedures.get(&call.name.name)?.get_declared_arguments();
+
+                    for (i, arg) in call.args.iter().enumerate() {
+                        if (*pid_for == arg.name) {
+                            match argdecl[i].type_name {
+                                Type::Const => {}
+                                _ => return Some(call.name.begin),
+                            }
+                        }
+                    }
+                }
                 Command::Read { name } => match name {
                     Var { name } => {
                         if name.name == *pid_for {
@@ -626,8 +639,6 @@ impl Compiler {
         return None;
     }
 
-    // TODO: check na wartosci
-    // TODO: EXAMPLE A naprawic!
     pub fn command_for(
         pid: &String,
         val_lhs: &Value,
@@ -641,7 +652,7 @@ impl Compiler {
     ) -> Result<Vec<Instruction>, CompilerError> {
         let mut res: Vec<Instruction> = vec![];
 
-        let check = Self::check_for_assignment(pid, comm);
+        let check = Self::check_for_assignment(pid, comm, procedures);
         match check {
             Some(position) => {
                 return Err(CompilerError {
@@ -670,7 +681,7 @@ impl Compiler {
         initialized.insert(pid.clone());
 
         /* prawa strona - wartosc koncowa */
-        let end_name: String = format!("{}:iter", pid.clone());
+        let end_name: String = format!("{}:iter_end", pid.clone());
         stack.insert(end_name.clone(), Variable::Atomic { position: *sp });
         let end_value_position: i64 = *sp as i64;
         *sp += 1;
@@ -683,6 +694,25 @@ impl Compiler {
             pos: end_value_position,
         });
         initialized.insert(end_name.clone());
+
+        /* lewa strona - wartosc poczatkowa */
+        let begin_name: String = format!("{}:iter_begin", pid.clone());
+        stack.insert(begin_name.clone(), Variable::Atomic { position: *sp });
+        let begin_value_position: i64 = *sp as i64;
+        *sp += 1;
+
+        // obslugujemy tylko jeden case wiec:
+        res.extend(Self::handle_value(&val_lhs, stack, initialized)?); // A == wartosc koncowa,
+        // ktora kopiujemy
+
+        res.push(Instruction::INC { pos: A });
+
+        res.push(Instruction::STORE {
+            pos: begin_value_position,
+        });
+        initialized.insert(begin_name.clone());
+
+        /****/
 
         let loop_begin: usize = res.len();
 
@@ -697,14 +727,14 @@ impl Compiler {
         let block_instructions_len = block_instructions.len();
 
         if is_downto {
-           res.push(Instruction::LOAD {
+            res.push(Instruction::LOAD {
                 pos: end_value_position,
             });
 
-            res.push(Instruction::DEC { pos: A });
+            //  res.push(Instruction::INC { pos: A });
             res.push(Instruction::SWP { pos: E });
             res.push(Instruction::LOAD {
-                pos: iterator_position,
+                pos: begin_value_position,
             });
 
             res.push(Instruction::SUB { pos: E });
@@ -728,7 +758,7 @@ impl Compiler {
         }
 
         res.push(Instruction::JZERO {
-            pos: (block_instructions_len + 5) as i64,
+            pos: (block_instructions_len + (if is_downto { 8 } else { 5 })) as i64,
             adjust: true,
         }); // + na inc
 
@@ -741,6 +771,13 @@ impl Compiler {
             res.push(Instruction::DEC { pos: A });
             res.push(Instruction::STORE {
                 pos: iterator_position,
+            });
+            res.push(Instruction::LOAD {
+                pos: begin_value_position,
+            });
+            res.push(Instruction::DEC { pos: A });
+            res.push(Instruction::STORE {
+                pos: begin_value_position,
             });
         } else {
             res.push(Instruction::LOAD {
@@ -759,9 +796,12 @@ impl Compiler {
         /* clearing the stack */
         stack.remove(pid);
         stack.remove(&end_name);
+        stack.remove(&begin_name);
         *sp -= 2;
         initialized.remove(pid);
         initialized.remove(&end_name);
+
+        initialized.remove(&begin_name);
 
         return Ok(res);
     }
@@ -848,39 +888,57 @@ impl Compiler {
                 // TODO: co gdy jakby czytamy ją ale np w a := b?
                 Type::Undefined => {
                     /*TODO*/
+                    let mut is_written = false;
                     for command in procedure_compiler.get_commands() {
+                        if is_written {
+                            break;
+                        }
+
                         match command {
                             Read { name } => match name {
                                 Var { name } => {
                                     if (name.name == arg_decl.name.name) {
-                                        return Err(CompilerError {
-                                            error_type: CompilingErrorType::AssignmentToConstType,
-                                            id: name.name,
-                                            pos: name.begin,
-                                        });
+                                        is_written = true;
+                                        
                                     }
                                 }
                                 Array_Var { name, var } => {
                                     if (name.name == arg_decl.name.name) {
-                                        return Err(CompilerError {
-                                            error_type: CompilingErrorType::AssignmentToConstType,
-                                            id: name.name,
-                                            pos: name.begin,
-                                        });
+                                        
+                                        is_written = true;
                                     }
                                 }
                                 Array { name, var } => {
                                     if (name.name == arg_decl.name.name) {
-                                        return Err(CompilerError {
-                                            error_type: CompilingErrorType::AssignmentToConstType,
-                                            id: name.name,
-                                            pos: name.begin,
-                                        });
+                                        
+                                        is_written = true;
                                     }
                                 }
                             },
+                            Assign { name, expr } => match name {
+                                Var { name } => {
+                                    if (name.name == arg_decl.name.name) {
+                                        is_written = true;
+                                        
+                                    }
+                                }
+                                Array_Var { name, var } => {
+                                    if (name.name == arg_decl.name.name) {
+                                        
+                                        is_written = true;
+                                    }
+                                }
+                                Array { name, var } => {
+                                    if (name.name == arg_decl.name.name) {
+                                        
+                                        is_written = true;
+                                    }
+                                }
 
-                            _ => {}
+                            }
+                            
+
+                            _ => { /*sprawdzic*/ }
                         }
                     }
                 }
@@ -893,7 +951,7 @@ impl Compiler {
         // jeżeli ma O, to nie mogę dam tać I ani T
         // jeżeli ma T, to nie mogę dać O ani I ani bez typu
         // jeżeli nie ma typu, to nie mogę T ani O
-
+        //
         // for command in procedure_compiler.get_commands() {
         //     match command {
         //         Call { call } => {
@@ -915,16 +973,42 @@ impl Compiler {
         //             // teraz jej ArgsDecl
         //             let inside_call_args_decl = inside_call.get_declared_arguments();
         //
-        //             // porównuję typy
-        //             for (arg_decl, call_arg) in inside_call_args_decl.iter().zip(call.args) {
-        //                 match arg_decl.type_name {
-        //                     Type::Array => {},
-        //                     Type::Const => {
+        //             for (i, call_arg) in call.args.iter().enumerate() {
+        //                 for arg_decl in &procedure_arguments {
+        //                     if (arg_decl.name.name == call_arg.name) {
+        //                         match arg_decl.type_name {
+        //                             Type::Array => {
         //
+        //                             }, // tylko array moze byc
+        //                             Type::Const => {
         //
-        //                     },
-        //                     Type::Undefined => {},
-        //                     Type::Scalar => {},
+        //                             }, //bład jak ity z inside_call_args !=
+        //                             //const
+        //                             Type::Undefined => {
+        //
+        //                             }, // nie moze byc array, nie moze byc
+        //                             // const
+        //                             Type::Scalar => {
+        //
+        //                             }, // nie moze byc array
+        //                         }
+        //                         break;
+        //                     }
+        //                 }
+        //
+        //                 if (procedure_declarations.is_some()) {
+        //                     for proc_decl in &procedure_declarations.clone().unwrap() {
+        //                         match proc_decl {
+        //                             Declaration::Atomic { name } => {
+        //                                 if name.name == call_arg.name {
+        //                                     // czy inside nie array 
+        //                                 }
+        //                             },
+        //                             Declaration::Array { name, num_lhs, num_rhs } => {
+        //                                 // a tutaj ma byc array
+        //                             },
+        //                         }
+        //                     }
         //                 }
         //             }
         //         }

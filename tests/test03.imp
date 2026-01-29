@@ -1,0 +1,15 @@
+# Test referencji
+PROCEDURE ff(a, b) IS IN
+    a := 3;
+    b := a + 4;
+END
+
+PROGRAM IS
+    p
+IN
+    p := 0;
+
+    ff(p,p);
+
+    WRITE p; # > 7;
+END

@@ -1,0 +1,16 @@
+PROCEDURE p(I a, O b) IS IN
+    b := a + 3;
+END
+
+PROCEDURE q(I a, O b) IS IN
+    p(b, a);
+    #ERROR: argument `b` typu out przekazany do procedury w trybie in
+    #ERROR: argument `a` typu in  przekazany do procedury w trybie out
+END
+
+PROGRAM IS
+    n, a
+IN
+    READ a;
+    p(a, n);
+END

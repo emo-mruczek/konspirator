@@ -1,0 +1,5 @@
+# Test zwijania stałych
+PROGRAM IS v IN
+    v := 4 - 5;
+    WRITE v; # > 0
+END

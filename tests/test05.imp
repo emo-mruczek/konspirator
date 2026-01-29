@@ -1,0 +1,11 @@
+PROCEDURE dummy(O a) IS tt IN
+    tt := 0;
+END
+
+PROGRAM IS v IN
+    dummy(v);
+
+    WRITE v;
+    # Technicznie poprawne: argumenty w trybie out można przyjąć
+    # za zainicjalizowane wewnątrz procedury
+END

@@ -1,0 +1,13 @@
+PROCEDURE p(I a, b) IS IN
+    b := a + 3;
+END
+
+PROGRAM IS
+    n
+IN
+    READ n;
+    FOR i FROM 1 TO n DO
+        p(n,i); #ERROR: iterator `i` jest użyty jako argument pozycji in-out
+    ENDFOR
+    WRITE n;
+END

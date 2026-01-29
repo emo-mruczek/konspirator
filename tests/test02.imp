@@ -1,0 +1,27 @@
+# Test zagnieżdżeń
+PROGRAM IS
+    v
+IN
+    v := 0;
+    FOR i FROM 1 TO 4 DO
+        FOR j FROM 1 TO 4 DO
+            FOR k FROM 1 TO 4 DO
+                FOR l FROM 1 TO 4 DO
+                    FOR m FROM 1 TO 4 DO
+                        FOR n FROM 1 TO 4 DO
+                            FOR o FROM 1 TO 4 DO
+                                FOR p FROM 1 TO 4 DO
+                                    FOR q FROM 1 TO 4 DO
+                                        v := v + 1;
+                                    ENDFOR
+                                ENDFOR
+                            ENDFOR
+                        ENDFOR
+                    ENDFOR
+                ENDFOR
+            ENDFOR
+        ENDFOR
+    ENDFOR
+
+    WRITE v; # > 262144
+END

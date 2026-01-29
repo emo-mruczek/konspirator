@@ -1,0 +1,5 @@
+PROGRAM IS 
+    n,t[11:10] #ERROR: błędny zakres tablicy.
+IN
+    READ n;
+END
